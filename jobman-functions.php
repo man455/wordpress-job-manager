@@ -44,9 +44,8 @@ function jobman_create_widget($function, $title) {
 }
 
 function jobman_url($func = 'all', $data = '') {
-	$options = get_option('jobman_options');
 	$structure = get_option('permalink_structure');
-	$url = $options['page_name'];
+	$url = get_option('jobman_page_name');
 	
 	if($structure == '') {
 		$return = get_option('home') . '?' . $url . '=' . $func;
