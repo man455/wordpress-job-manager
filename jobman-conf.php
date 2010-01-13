@@ -399,7 +399,7 @@ function jobman_print_other_plugins_box() {
 		<table class="form-table">
 			<tr>
 				<th scope="row"><?php _e('Add Job pages to your Sitemap?', 'jobman') ?></th>
-				<td><input type="checkbox" value="1" name="plugin-gxs"<?php echo ($options['plugin']['gxs'])?(' checked="checked"'):('') ?> /></td>
+				<td><input type="checkbox" value="1" name="plugin-gxs"<?php echo ($options['plugins']['gxs'])?(' checked="checked"'):('') ?> /></td>
 			</tr>
 		</table>
 <?php
@@ -766,6 +766,7 @@ function jobman_application_setup() {
 	$fields = $options['fields'];
 
 	if(count($fields) > 0 ) {
+		uasort($fields, 'jobman_sort_fields');
 		foreach($fields as $id => $field) {
 ?>
 			<tr class="form-table">
@@ -947,6 +948,7 @@ function jobman_list_applications() {
 				<h4><?php _e('Custom Filters', 'jobman') ?></h4>
 <?php
 	if(count($fields) > 0) {
+		uasort($fields, 'jobman_sort_fields');
 ?>
 				<table class="widefat page fixed" cellspacing="0">
 					<thead>
@@ -1061,6 +1063,7 @@ function jobman_list_applications() {
 <?php
 	$args = array();
 	$args['post_type'] = 'jobman_app';
+	$args['offset'] = 0;
 	
 	// Add job filter
 	if(array_key_exists('jobman-jobid', $_REQUEST)) {
@@ -1076,9 +1079,9 @@ function jobman_list_applications() {
 	}
 	
 	$applications = get_posts($args);
-
+	
 	$app_displayed = false;
-	if(count($applications) > 0) {
+	while(count($applications) > 0) {
 		foreach($applications as $app) {
 			$appmeta = get_post_custom($app->ID);
 
@@ -1134,7 +1137,7 @@ function jobman_list_applications() {
 				<th scope="row" class="check-column"><input type="checkbox" name="application[]" value="<?php echo $app->ID ?>" /></th>
 <?php
 			$parent = get_post($app->post_parent);
-			if($parent != NULL && $parent->post_type == 'jobman_app') {
+			if($parent != NULL && $parent->post_type == 'jobman_job') {
 ?>
 				<td><strong><a href="?page=jobman-list-jobs&amp;jobman-jobid=<?php echo $parent->ID ?>"><?php echo $parent->post_title ?></a></strong></td>
 <?php
@@ -1184,6 +1187,10 @@ function jobman_list_applications() {
 			</tr>
 <?php
 		}
+		
+		$args['offset'] += count($applications);
+		
+		$applications = get_posts($args);
 	}
 	if(!$app_displayed) {
 ?>
@@ -1486,7 +1493,7 @@ function jobman_categories_updatedb() {
 			$newcount++;
 			// INSERT new field
 			if($_REQUEST['title'][$ii] != '') {
-				$catid = wp_insert_term($_REQUEST['title'][$ii], 'jobman_category', array('slug' => $_REQUEST['slug'][$ii], 'description' => $_REQUEST['email'][$ii]));
+				$cat = wp_insert_term($_REQUEST['title'][$ii], 'jobman_category', array('slug' => $_REQUEST['slug'][$ii], 'description' => $_REQUEST['email'][$ii]));
 
 				$page = array(
 							'comment_status' => 'closed',
@@ -1500,7 +1507,7 @@ function jobman_categories_updatedb() {
 							'post_parent' => $options['main_page']);
 				$id = wp_insert_post($page);
 				add_post_meta($id, '_catpage', 1, true);
-				add_post_meta($id, '_cat', $catid, true);
+				add_post_meta($id, '_cat', $cat['term_id'], true);
 			}
 			else {
 				// No input. Don't insert into the DB.
@@ -1597,7 +1604,6 @@ function jobman_icons_updatedb() {
 				move_uploaded_file($_FILES['icon']['tmp_name'][$ii], WP_PLUGIN_DIR . '/' . JOBMAN_FOLDER . '/icons/' . $id . '.' . $ext);
 			}
 		}
-
 
 		$ii++;
 	}
