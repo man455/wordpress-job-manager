@@ -68,5 +68,20 @@ function jobman_page_taxonomy_setup() {
 	register_taxonomy('jobman_category', array('jobman_job', 'jobman_app'), array('hierarchical' => false, 'label' => __('Category', 'series')));
 }
 
+function jobman_page_hierarchical_setup($types) {
+	$types[] = 'jobman_job';
+	$types[] = 'jobman_joblist';
+	$types[] = 'jobman_app_form';
+
+	return $types;
+}
+
+function jobman_sort_fields($a, $b) {
+	if($a['sortorder'] == $b['sortorder']) {
+		return 0;
+	}
+	
+	return ($a['sortorder'] < $b['sortorder']) ? -1 : 1;
+}
 
 ?>

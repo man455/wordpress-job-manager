@@ -21,14 +21,15 @@ add_action('init', 'jobman_flush_rewrite_rules');
 add_filter('the_posts', 'jobman_display_jobs', 1);
 // Add our init stuff
 add_action('init', 'jobman_display_init');
-// Set the template we want to use
-add_action('template_redirect', 'jobman_display_template');
 // Set the <title> value
 add_filter('wp_title', 'jobman_display_title', 10, 3);
 // Add our own <head> information
 add_action('wp_head', 'jobman_display_head');
-// Set the edit post link
-add_filter('get_edit_post_link', 'jobman_display_edit_post_link');
+
+// For the slugs (treat jobman pages as WP pages)
+add_filter('hierarchical_post_types', 'jobman_page_hierarchical_setup');
+// For the page links
+add_filter('post_link', 'jobman_page_link', 10, 2);
 
 // Our custom page/taxonomy setup
 add_action('init', 'jobman_page_taxonomy_setup');
