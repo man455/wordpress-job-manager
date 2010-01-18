@@ -8,8 +8,6 @@ function jobman_queryvars($qvars) {
 	$qvars[] = 'jobman_root_id';
 	$qvars[] = 'jobman_page';
 	$qvars[] = 'jobman_data';
-	$qvars[] = 'jobman_username';
-	$qvars[] = 'jobman_password';
 	return $qvars;
 }
 
@@ -83,10 +81,6 @@ function jobman_display_jobs($posts) {
 				$postdata[$key] = $value;
 			}
 		}
-	}
-	
-	if(array_key_exists('jobman_username', $wp_query->query_vars)) {
-		jobman_login();
 	}
 
 	$jobman_data = '';
@@ -286,7 +280,7 @@ function jobman_display_jobs_list($cat) {
 		$page = get_post($options['main_page']);
 	}
 	else {
-		$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$cat);
+		$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$cat.'&numberposts=-1');
 		if(count($data) > 0) {
 			$page = get_post($data[0]->ID, OBJECT);
 		}
@@ -308,19 +302,19 @@ function jobman_display_jobs_list($cat) {
 		}
 	}
 	
-	if($cat == 'all') {
-		$jobs = get_posts('post_type=jobman_job');
-	}
-	else {
-		$jobs = get_posts('post_type=jobman_job&jobman_category='.$category->slug);
-	}
-	
-	if($options['user_registration']) {
-		if($cat == 'all' && $options['loginform_main']) {
-			$content .= jobman_display_login();
-		}
-		else if($cat != 'all' && $options['loginform_category']) {
-			$content .= jobman_display_login();
+	$jobs = get_posts('post_type=jobman_job&numberposts=-1');
+	if($cat != 'all') {
+		foreach($jobs as $key => $job) {
+			$cats = wp_get_object_terms($job->ID, 'jobman_category');
+			$cats_arr = array();
+			if(count($cats) > 0) {
+				foreach($cats as $cat) {
+					$cats_arr[] = $cat->term_id;
+				}
+			}
+			if(!isset($category->term_id) || !in_array($category->term_id, $cats_arr)) {
+				unset($jobs[$key]);
+			}
 		}
 	}
 
@@ -365,13 +359,13 @@ function jobman_display_jobs_list($cat) {
 		}
 	}
 	else {
-		$data = get_posts('post_type=jobman_app_form');
+		$data = get_posts('post_type=jobman_app_form&numberposts=-1');
 		if(count($data > 0)) {
 			$applypage = $data[0];
 		}
 		$content .= '<p>';
 		if($cat == 'all' || !isset($category->term_id)) {
-			$content .= sprintf(__('We currently don\'t have any jobs available. Please check back regularly, as we frequently post new jobs. In the meantime, you can also <a href="%s">send through your résumé</a>, which we\'ll keep on file.', 'jobman'), get_page_link($applypage->ID));
+			$content .= sprintf(__('We currently don\'t have any jobs available. Please check back regularly, as we frequently post new jobs. In the mean time, you can also <a href="%s">send through your résumé</a>, which we\'ll keep on file.', 'jobman'), get_page_link($applypage->ID));
 		}
 		else {
 			$url = get_page_link($applypage->ID);
@@ -407,10 +401,6 @@ function jobman_display_job($job) {
 		$job = get_post($job);
 	}
 	
-	if($options['user_registration'] && $options['loginform_job'] && $options['list_type'] == 'summary') {
-		$content .= jobman_display_login();
-	}
-	
 	if($job == NULL) {
 		$page->post_title = __('This job doesn\'t exist', 'jobman');
 		$page->post_author = 1;
@@ -418,7 +408,7 @@ function jobman_display_job($job) {
 		$page->post_type = 'page';
 		$page->post_status = 'published';
 
-		$content .= '<p>' . sprintf(__('Perhaps you followed an out-of-date link? Please check out the <a href="%s">jobs we have currently available</a>.', 'jobman'), get_page_link($options['main_page'])) . '</p>';
+		$content = sprintf(__('Perhaps you followed an out-of-date link? Please check out the <a href="%s">jobs we have currently available</a>.', 'jobman'), get_page_link($options['main_page']));
 		
 		$page->post_content = $content;
 			
@@ -445,7 +435,7 @@ function jobman_display_job($job) {
 		$cats = array();
 		$ii = 1;
 		foreach($categories as $cat) {
-			$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$cat->term_id);
+			$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$cat->term_id.'&numberposts=-1');
 			if(count($data) > 0) {
 				$cats[] = '<a href="'. get_page_link($data[0]->ID) . '" title="' . sprintf(__('Jobs for %s', 'jobman'), $cat->name) . '">' . $cat->name . '</a>';
 			}
@@ -466,7 +456,7 @@ function jobman_display_job($job) {
 	$content .= '<tr><th scope="row">' . __('Location', 'jobman') . '</th><td>' . $jobdata['location'] . '</td></tr>';
 	$content .= '<tr><th scope="row">' . __('Information', 'jobman') . '</th><td>' . jobman_format_abstract($job->post_content) . '</td></tr>';
 
-	$data = get_posts('post_type=jobman_app_form');
+	$data = get_posts('post_type=jobman_app_form&numberposts=-1');
 	if(count($data > 0)) {
 		$applypage = $data[0];
 	}
@@ -502,7 +492,7 @@ function jobman_display_apply($jobid, $cat = NULL) {
 	
 	$content = '';
 	
-	$data = get_posts('post_type=jobman_app_form');
+	$data = get_posts('post_type=jobman_app_form&numberposts=-1');
 	if(count($data > 0)) {
 		$page = $data[0];
 	}
@@ -534,10 +524,6 @@ function jobman_display_apply($jobid, $cat = NULL) {
 		$page->post_content .= '<div class="jobman-message">' . $msg . '</div>';
 		
 		return array($page);
-	}
-
-	if($options['user_registration'] && $options['loginform_apply']) {
-		$content .= jobman_display_login();
 	}
 
 	if($jobid > 0) {
@@ -696,71 +682,6 @@ function jobman_display_robots_noindex() {
 <?php
 }
 
-global $jobman_login_failed;
-$jobman_login_failed = false;
-
-function jobman_display_login() {
-	global $current_user;
-	get_currentuserinfo();
-	
-	$options = get_option('jobman_options');
-	
-	$content = '';
-	
-	if( is_user_logged_in() ) {
-		$content .= '<div id="jobman_loggedin"><span class="message">';
-		$content .= sprintf(__('Welcome back, %1s!', 'jobman'), $current_user->display_name);
-		$content .= '</span>';
-		$content .= '</div>';
-	}
-	else {
-		$content .= '<form action="" method="post">';
-		$content .= '<div id="jobman_login"><label class="username" for="jobman_username">' . __('Username', 'jobman') . ': ';
-		$content .= '<input type="text" name="jobman_username" id="jobman_username" /></label>';
-		$content .= '<label class="password" for="jobman_password">' . __('Password', 'jobman') . ': ';
-		$content .= '<input type="password" name="jobman_password" id="jobman_password" /></label>';
-		$content .= '<input type="submit" name="submit" value="' . __('Login', 'jobman') . '" />';
-		$content .= '<span><a href="' . get_page_link($options['register_page']) . '">' . __('Register', 'jobman') . '</a> | <a href="">' . __('Forgot your password?', 'jobman') . '</a></span></div>';
-		$content .= '</form>';
-	}
-	
-	return $content;
-}
-
-function jobman_login() {
-	global $wp_query, $jobman_login_failed;
-	
-	$username = $wp_query->query_vars['jobman_username'];
-	$password = $wp_query->query_vars['jobman_password'];
-	
-	if( user_pass_ok( $username, $password ) ) {
-		$creds = array(
-					'user_login' => $username,
-					'user_password' => $password,
-					'remember' => true
-				);
-		wp_signon( $creds );
-		
-		$pageURL = 'http';
-		if( $_SERVER["HTTPS"] == "on" ) {
-			$pageURL .= "s";
-		}
-		$pageURL .= "://";
-		if( $_SERVER["SERVER_PORT"] != "80" ) {
-			$pageURL .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"] . $_SERVER["REQUEST_URI"];
-		} 
-		else {
-			$pageURL .= $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
-		}	
-		
-		wp_redirect( $pageURL );
-		exit;
-	}
-	else {
-		$jobman_login_failed = true;
-	}
-}
-
 function jobman_format_abstract($text) {
 	$textsplit = preg_split("[\n]", $text);
 	
@@ -828,7 +749,7 @@ function jobman_store_application($jobid, $cat) {
 	if($job == NULL && $cat != NULL) {
 		$cat = get_term_by('slug', $cat, 'jobman_category');
 		if($cat != NULL) {
-			$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$cat->term_id);
+			$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$cat->term_id.'&numberposts=-1');
 			if(count($data) > 0) {
 				$parent = $data[0]->ID;
 			}

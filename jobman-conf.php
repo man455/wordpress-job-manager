@@ -51,10 +51,6 @@ function jobman_conf() {
 		check_admin_referer('jobman-icons-updatedb');
 		jobman_icons_updatedb();
 	}
-	else if(isset($_REQUEST['jobmanusersubmit'])) {
-		check_admin_referer('jobman-users-updatedb');
-		jobman_users_updatedb();
-	}
 	else if(isset($_REQUEST['jobmanappemailsubmit'])) {
 		check_admin_referer('jobman-application-email-updatedb');
 		jobman_application_email_updatedb();
@@ -78,13 +74,13 @@ function jobman_conf() {
 	}
 
 	if(!get_option('pento_consulting')) {
-		$widths = array('78%', '20%');
+		$widths = array('60%', '39%');
 		$functions = array(
-						array('jobman_print_settings_box', 'jobman_print_categories_box', 'jobman_print_icons_box', 'jobman_print_user_box', 'jobman_print_application_email_box', 'jobman_print_other_plugins_box'),
+						array('jobman_print_settings_box', 'jobman_print_categories_box', 'jobman_print_icons_box', 'jobman_print_application_email_box', 'jobman_print_other_plugins_box'),
 						array('jobman_print_donate_box', 'jobman_print_about_box')
 					);
 		$titles = array(
-					array(__('Settings', 'jobman'), __('Categories', 'jobman'), __('Icons', 'jobman'), __('User Settings', 'jobman'), __('Application Email Settings', 'jobman'), __('Other Plugins', 'jobman')),
+					array(__('Settings', 'jobman'), __('Categories', 'jobman'), __('Icons', 'jobman'), __('Application Email Settings', 'jobman'), __('Other Plugins', 'jobman')),
 					array(__('Donate', 'jobman'), __('About This Plugin', 'jobman'))
 				);
 	}
@@ -92,11 +88,11 @@ function jobman_conf() {
 		$widths = array('49%', '49%');
 		$functions = array(
 						array('jobman_print_settings_box', 'jobman_print_categories_box', 'jobman_print_other_plugins_box'),
-						array('jobman_print_icons_box', 'jobman_print_user_box', 'jobman_print_application_email_box')
+						array('jobman_print_icons_box', 'jobman_print_application_email_box')
 					);
 		$titles = array(
 					array(__('Settings', 'jobman'), __('Categories', 'jobman'), __('Other Plugins', 'jobman')),
-					array(__('Icons', 'jobman'), __('User Settings', 'jobman'), __('Application Email Settings', 'jobman'))
+					array(__('Icons', 'jobman'), __('Application Email Settings', 'jobman'))
 				);
 	}
 	jobman_create_dashboard($widths, $functions, $titles);
@@ -105,7 +101,18 @@ function jobman_conf() {
 function jobman_print_settings_box() {
 	$options = get_option('jobman_options');
 	$structure = get_option('permalink_structure');
-	?>
+	
+	$root = get_page($options['main_page']);
+	if($structure == '') {
+		$url_before = get_option('home') . '/?p=' . $root->ID;
+		$url_after = '';
+	}
+	else {
+		$url_before = get_option('home') . '/';
+		$url_after = '/';
+	}
+
+?>
 		<form action="" method="post">
 		<input type="hidden" name="jobmanconfsubmit" value="1" />
 <?php 
@@ -115,8 +122,16 @@ function jobman_print_settings_box() {
 			<tr>
 				<th scope="row"><?php _e('URL path', 'jobman') ?></th>
 				<td colspan="2">
-					<a href="<?php echo get_page_link($options['main_page']) ?>"><?php echo get_page_link($options['main_page']) ?></a> 
-					(<a href="<?php echo admin_url('page.php?action=edit&post=' . $options['main_page']) ?>"><?php _e('edit', 'jobman') ?></a>)
+<?php 
+	echo $url_before;
+	if($structure == '') {
+		echo '<input type="hidden" name="page-name" value="' . $root->post_name . '" />';
+	}
+	else {
+		echo '<input class="small-text code" type="text" name="page-name" value="' . $root->post_name . '" />';
+	}
+	echo $url_after; 
+?>
 				</td>
 			</tr>
 			<tr>
@@ -157,14 +172,11 @@ function jobman_print_settings_box() {
 }
 
 function jobman_print_categories_box() {
-	$options = get_option('jobman_options');
 ?>
-		<p><?php _e('Similar to the normal WordPress Categories, Job Manager categories can be used to split jobs into different groups. They can also be used to customise how the Application Form appears for jobs in different categories.', 'jobman') ?></p>
 		<p>
 			<strong><?php _e('Title', 'jobman') ?></strong> - <?php _e('The display name of the category', 'jobman') ?><br/>
 			<strong><?php _e('Slug', 'jobman') ?></strong> - <?php _e('The URL of the category', 'jobman') ?><br/>
-			<strong><?php _e('Email', 'jobman') ?></strong> - <?php _e('The address to notify when new applications are submitted in this category', 'jobman') ?><br/>
-			<strong><?php _e('Link', 'jobman') ?></strong> - <?php _e('The URL of the list of jobs in this category', 'jobman') ?>
+			<strong><?php _e('Email', 'jobman') ?></strong> - <?php _e('The address to notify when new applications are submitted in this category', 'jobman') ?>
 		</p>
 		<form action="" method="post">
 		<input type="hidden" name="jobmancatsubmit" value="1" />
@@ -177,27 +189,14 @@ function jobman_print_categories_box() {
 				<th scope="col"><?php _e('Title', 'jobman') ?></th>
 				<th scope="col"><?php _e('Slug', 'jobman') ?></th>
 				<th scope="col"><?php _e('Email', 'jobman') ?></th>
-				<th scope="col"><?php _e('Link', 'jobman') ?></th>
 				<th scope="col" class="jobman-fielddelete"><?php _e('Delete', 'jobman') ?></th>
 			</tr>
 			</thead>
 <?php
 	$categories = get_terms('jobman_category', 'hide_empty=0');
-	$structure = get_option('permalink_structure');
 	
 	if(count($categories) > 0 ) {
 		foreach($categories as $cat) {
-		if($structure == '') {
-			$url = get_option('home') . '/?jcat=' . $cat->term_id;
-		}
-		else {
-			$url = get_page_link($options['main_page']);
-			if(substr($url, -1) == '/') {
-				$url .= $cat->slug . '/';
-			} else {
-				$url .= '/' . $cat->slug;
-			}
-		}
 ?>
 			<tr>
 				<td>
@@ -206,7 +205,6 @@ function jobman_print_categories_box() {
 				</td>
 				<td><input class="regular-text code" type="text" name="slug[]" value="<?php echo $cat->slug ?>" /></td>
 				<td><input class="regular-text code" type="text" name="email[]" value="<?php echo $cat->description ?>" /></td>
-				<td><a href="<?php echo $url ?>"><?php _e('Link', 'jobman') ?></a></td>
 				<td><a href="#" onclick="jobman_delete(this, 'id', 'jobman-delete-category-list'); return false;"><?php _e('Delete', 'jobman') ?></a></td>
 			</tr>
 <?php
@@ -217,13 +215,12 @@ function jobman_print_categories_box() {
 	$template .= '<input class="regular-text code" type="text" name="title[]" /></td>';
 	$template .= '<td><input class="regular-text code" type="text" name="slug[]" /></td>';
 	$template .= '<td><input class="regular-text code" type="text" name="email[]" /></td>';
-	$template .= '<td>&nbsp;</td>';
 	$template .= '<td><a href="#" onclick="jobman_delete(this, \\\'id\\\', \\\'jobman-delete-category-list\\\'); return false;">' . __('Delete', 'jobman') . '</a></td>';
 	
 	echo $template;
 ?>
 		<tr id="jobman-catnew">
-				<td colspan="5" style="text-align: right;">
+				<td colspan="4" style="text-align: right;">
 					<input type="hidden" name="jobman-delete-list" id="jobman-delete-category-list" value="" />
 					<a href="#" onclick="jobman_new('jobman-catnew', 'category'); return false;"><?php _e('Add New Category', 'jobman') ?></a>
 				</td>
@@ -241,7 +238,6 @@ function jobman_print_categories_box() {
 function jobman_print_icons_box() {
 	$options = get_option('jobman_options');
 ?>
-		<p><?php _e('Icons can be assigned to jobs that you want to draw attention to. These icons will only be displayed when using the "Summary" jobs list type.', 'jobman') ?></p>
 		<p>
 			<strong><?php _e('Icon', 'jobman') ?></strong> - <?php _e('The current icon', 'jobman') ?><br/>
 			<strong><?php _e('Title', 'jobman') ?></strong> - <?php _e('The display name of the icon', 'jobman') ?><br/>
@@ -303,42 +299,11 @@ function jobman_print_icons_box() {
 <?php
 }
 
-function jobman_print_user_box() {
-	$options = get_option('jobman_options');
-?>
-		<p><?php _e('Allowing users to register means that they and you can more easily keep track of jobs they\'ve applied for.', 'jobman') ?></p>
-		<form action="" method="post">
-		<input type="hidden" name="jobmanusersubmit" value="1" />
-<?php 
-	wp_nonce_field('jobman-users-updatedb'); 
-?>
-		<table class="form-table">
-			<tr>
-				<th scope="row"><?php _e('Enable User Registration', 'jobman') ?></th>
-				<td><input type="checkbox" value="1" name="user-registration" <?php echo ($options['user_registration'])?('checked="checked" '):('') ?>/></td>
-				<td><span class="description"><?php _e('This will allow users to register for the Jobs system, even if user registration is disabled for your blog.', 'jobman') ?></span></td>
-			</tr>
-			<tr>
-				<th scope="row"><?php _e('Which pages should the login form be displayed on?', 'jobman') ?></th>
-				<td colspan="2">
-					<input type="checkbox" value="1" name="loginform-main" <?php echo ($options['loginform_main'])?('checked="checked" '):('') ?>/> <?php _e('The main jobs list', 'jobman') ?><br />
-					<input type="checkbox" value="1" name="loginform-category" <?php echo ($options['loginform_category'])?('checked="checked" '):('') ?>/> <?php _e('Category jobs lists', 'jobman') ?><br />
-					<input type="checkbox" value="1" name="loginform-job" <?php echo ($options['loginform_job'])?('checked="checked" '):('') ?>/> <?php _e('Individual jobs', 'jobman') ?><br />
-					<input type="checkbox" value="1" name="loginform-apply" <?php echo ($options['loginform_apply'])?('checked="checked" '):('') ?>/> <?php _e('The application form', 'jobman') ?><br />
-				</td>
-			</tr>
-		</table>
-		<p class="submit"><input type="submit" name="submit"  class="button-primary" value="<?php _e('Update User Settings', 'jobman') ?>" /></p>
-		</form>
-<?php
-}
-
 function jobman_print_application_email_box() {
 	$options = get_option('jobman_options');
 	
 	$fields = $options['fields'];
 ?>
-		<p><?php _e('When an application successfully submits an application, an email will be sent to the appropriate user. These options allow you to customise that email.', 'jobman') ?></p>
 		<form action="" method="post">
 		<input type="hidden" name="jobmanappemailsubmit" value="1" />
 <?php 
@@ -488,7 +453,7 @@ function jobman_list_jobs() {
 			break;
 	}
 	
-	$jobs = get_posts('post_type=jobman_job');
+	$jobs = get_posts('post_type=jobman_job&numberposts=-1');
 ?>
 		<form action="" method="post">
 <?php 
@@ -1099,6 +1064,7 @@ function jobman_list_applications() {
 	$args = array();
 	$args['post_type'] = 'jobman_app';
 	$args['offset'] = 0;
+	$args['numberposts'] = -1;
 	
 	// Add job filter
 	if(array_key_exists('jobman-jobid', $_REQUEST)) {
@@ -1385,7 +1351,7 @@ function jobman_application_mailout() {
 	
 	$fromid = $options['application_email_from'];
 	
-	$apps = get_posts(array('post_type' => 'jobman_app', 'post__in' => $_REQUEST['application']));
+	$apps = get_posts(array('post_type' => 'jobman_app', 'post__in' => $_REQUEST['application'], 'numberposts' => -1));
 	
 	$emails = array();
 	foreach($apps as $app) {
@@ -1452,6 +1418,10 @@ function jobman_application_mailout_send() {
 
 function jobman_conf_updatedb() {
 	$options = get_option('jobman_options');
+	
+	$root = get_page($options['main_page']);
+	$root->post_name = $_REQUEST['page-name'];
+	wp_update_post($root);
 	
 	$options['default_email'] = $_REQUEST['default-email'];
 	$options['list_type'] = $_REQUEST['list-type'];
@@ -1548,7 +1518,7 @@ function jobman_categories_updatedb() {
 		}
 		else {
 			// UPDATE existing field
-			$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$id);
+			$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$id.'&numberposts=-1');
 			if(count($data) > 0) {
 				$page = get_post($data[0]->ID, ARRAY_A);
 				$page['post_title'] = $_REQUEST['title'][$ii];
@@ -1568,7 +1538,7 @@ function jobman_categories_updatedb() {
 
 	$deletes = explode(',', $_REQUEST['jobman-delete-list']);
 	foreach($deletes as $delete) {
-		$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$id);
+		$data = get_posts('post_type=jobman_joblist&meta_key=_cat&meta_value='.$id.'&numberposts=-1');
 		if(count($data) > 0) {
 			wp_delete_post($data[0]->ID);
 		}
@@ -1644,27 +1614,9 @@ function jobman_icons_updatedb() {
 		unset($options['icons'][$delete]);
 		
 		// Remove the icon from any jobs that have it
-		$jobs = get_posts('post_type=jobman_job&meta_key=iconid&meta_value='.$delete);
+		$jobs = get_posts('post_type=jobman_job&meta_key=iconid&meta_value='.$delete.'&numberposts=-1');
 		foreach($jobs as $job) {
 			update_post_meta($job->ID, 'iconid', '');
-		}
-	}
-	
-	update_option('jobman_options', $options);
-}
-
-function jobman_users_updatedb() {
-	$options = get_option('jobman_options');
-
-	$postnames = array('user-registration', 'loginform-main', 'loginform-category', 'loginform-job', 'loginform-apply');
-	$optionnames = array('user_registration', 'loginform_main', 'loginform_category', 'loginform_job', 'loginform_apply');
-	
-	foreach($postnames as $key => $var) {
-		if($_REQUEST[$var]) {
-			$options[$optionnames[$key]] = 1;
-		}
-		else {
-			$options[$optionnames[$key]] = 0;
 		}
 	}
 	
@@ -1690,10 +1642,10 @@ function jobman_other_plugins_updatedb() {
 	$options = get_option('jobman_options');
 
 	if($_REQUEST['plugin-gxs']) {
-		$options['plugins']['gxs'] = 1;
+		$option['plugins']['gxs'] = 1;
 	}
 	else {
-		$options['plugins']['gxs'] = 0;
+		$option['plugins']['gxs'] = 1;
 	}
 	
 	update_option('jobman_options', $options);

@@ -3,7 +3,7 @@ Contributors: pento
 Donate link: http://pento.net/donate/
 Tags: jobs, manager, list, listing, employer, application
 Requires at least: 2.9
-Tested up to: 3.0-alpha
+Tested up to: 2.9.1
 Stable tag: trunk
 
 A job listing and job application management plugin for WordPress.
@@ -12,7 +12,7 @@ A job listing and job application management plugin for WordPress.
 
 A plugin for managing job lists and job applications on your WordPress site. It supports all the features you need to manage your organisation's job openings.
 
-Do you speak a language other than English? Do you have some time to translate some strings? If so, I'd love to [hear from you](http://pento.net/contact/)!
+***Important Note***: If you're upgrading from version 0.3.3 or earlier, *please* read the [upgrade documentation](http://code.google.com/p/wordpress-job-manager/wiki/UpgradingFrom03x). There have been significant changes that you need to know about.
 
 *    *Job Listing*
     *    Categories to create multiple job lists
@@ -59,20 +59,12 @@ Job Manager will add all of your job lists and job detail pages to your sitemap,
 
 == Changelog ==
 
-= 0.5 =
-* ADDED: New settings for user registration
-* ADDED: Nicer explanations of settings
-* ADDED: Links to categories from settings page
-* CHANGED: Removed main URL editing from settings
-* CHANGED: Settings page layout, for readability
-* FIXED: Category listing now significantly more efficient
-* FIXED: Google XML Sitemaps option not saving correctly
-
 = 0.4.7 =
 * FIXED: Empty job list message not displaying correctly
 * FIXED: New job showing a bad start date
 * FIXED: Some PHP notices
 * FIXED: Template from main page not being used correctly
+* FIXED: Removed 5 job limit from display code
 
 = 0.4.6 =
 * FIXED: Application email not being sent correctly
