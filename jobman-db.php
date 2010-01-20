@@ -215,21 +215,6 @@ function jobman_create_db() {
 				'post_parent' => $mainid);
 	$id = wp_insert_post($page);
 
-	// Create the register page
-	$page = array(
-				'comment_status' => 'closed',
-				'ping_status' => 'closed',
-				'post_status' => 'publish',
-				'post_author' => 1,
-				'post_content' => '',
-				'post_name' => 'register',
-				'post_title' => __('Register', 'jobman'),
-				'post_type' => 'jobman_register',
-				'post_parent' => $mainid);
-	$id = wp_insert_post($page);
-	
-	$options['register_page'] = $id;
-
 	// Create a page for each category
 	$wp_cats = get_categories();
 	$catpages = array();
@@ -528,8 +513,8 @@ function jobman_upgrade_db($oldversion) {
 			}
 		}
 	}
-	if($oldversion < 7) {
-		// Drop the old tables from 0.3
+	if($oldversion > 10) {
+		// Drop the old tables... at a later date.
 		$tables = array(
 					$wpdb->prefix . 'jobman_jobs',
 					$wpdb->prefix . 'jobman_categories',
@@ -546,21 +531,6 @@ function jobman_upgrade_db($oldversion) {
 			$sql = 'DROP TABLE IF EXISTS ' . $table;
 			$wpdb->query($sql);
 		}
-		
-		// Create the register page
-		$page = array(
-					'comment_status' => 'closed',
-					'ping_status' => 'closed',
-					'post_status' => 'publish',
-					'post_author' => 1,
-					'post_content' => '',
-					'post_name' => 'register',
-					'post_title' => __('Register', 'jobman'),
-					'post_type' => 'jobman_register',
-					'post_parent' => $options['main_page']);
-		$id = wp_insert_post($page);
-		
-		$options['register_page'] = $id;
 	}
 	
 	update_option('jobman_options', $options);

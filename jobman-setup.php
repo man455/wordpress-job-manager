@@ -39,12 +39,6 @@ function jobman_create_default_settings() {
 					'application_email_subject_text' => 'Job Application:',
 					'application_email_subject_fields' => array(2,3),
 					'promo_link' => 0,
-					'user_registration' => 0,
-					'user_registration_required' => 0,
-					'loginform_main' => 1,
-					'loginform_category' => 1,
-					'loginform_job' => 1,
-					'loginform_apply' => 1,
 					'plugins' => array(
 									'gxs' => 1
 								)
@@ -89,18 +83,6 @@ function jobman_upgrade_settings($oldversion) {
 		delete_option('jobman_application_email_subject_fields');
 		delete_option('jobman_promo_link');
 		delete_option('jobman_plugin_gxs');
-	}
-	if($oldversion < 7) {
-		$options = get_option('jobman_options');
-		
-		$options['user_registration'] = 0;
-		$options['user_registration_required'] = 0;
-		$options['loginform_main'] = 1;
-		$options['loginform_category'] = 1;
-		$options['loginform_job'] = 1;
-		$options['loginform_apply'] = 1;
-		
-		update_option('jobman_options', $options);
 	}
 }
 
