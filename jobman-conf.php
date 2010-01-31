@@ -104,8 +104,8 @@ function jobman_conf() {
 	if( ! $writeable ) {
 		echo '<div class="error">';
 		echo '<p>' . __( 'It seems the Job Manager data directories are not writeable. In order to allow applicants to upload resumes, and for you to upload icons, please make the following directories writeable.', 'jobman' ) . '</p>';
-		echo '<pre>' . dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . "\n";
-		echo dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'icons' . DIRECTORY_SEPARATOR . '</pre>';
+		echo '<pre>' . JOBMAN_UPLOAD_DIR . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . "\n";
+		echo JOBMAN_UPLOAD_DIR . DIRECTORY_SEPARATOR . 'icons' . DIRECTORY_SEPARATOR . '</pre>';
 		echo '<p>' . sprintf( __( 'For help with changing directory permissions, please see <a href="%1s">this page</a> in the WordPress documentation.', 'jobman' ), 'http://codex.wordpress.org/Changing_File_Permissions' ) . '</p>';
 		echo '</div>';
 	}
@@ -255,19 +255,11 @@ function jobman_print_categories_box() {
 	
 	echo $template;
 ?>
-			<tr id="jobman-catnew">
-					<td colspan="5" style="text-align: right;">
-						<input type="hidden" name="jobman-delete-list" id="jobman-delete-category-list" value="" />
-						<a href="#" onclick="jobman_new( 'jobman-catnew', 'category' ); return false;"><?php _e( 'Add New Category', 'jobman' ) ?></a>
-					</td>
-			</tr>
-		</table>
-		<table class="form-table">
-			<tr>
-				<th scope="row"><?php _e( 'Show related categories?', 'jobman' ) ?></th>
-				<td><input type="checkbox" name="related-categories" <?php echo ( $options['related_categories'] )?( 'checked="checked" ' ):( '' ) ?>/></td>
-				<td><span class="description"><?php _e( 'This will show a list of categories that any jobs in a given job list belong to.', 'jobman' ) ?></span></td>
-			</tr>
+		<tr id="jobman-catnew">
+				<td colspan="5" style="text-align: right;">
+					<input type="hidden" name="jobman-delete-list" id="jobman-delete-category-list" value="" />
+					<a href="#" onclick="jobman_new( 'jobman-catnew', 'category' ); return false;"><?php _e( 'Add New Category', 'jobman' ) ?></a>
+				</td>
 		</table>
 		<p class="submit"><input type="submit" name="submit"  class="button-primary" value="<?php _e( 'Update Categories', 'jobman' ) ?>" /></p>
 <script type="text/javascript"> 
@@ -311,7 +303,7 @@ function jobman_print_icons_box() {
 			<tr>
 				<td>
 					<input type="hidden" name="id[]" value="<?php echo $id ?>" />
-					<img src="<?php echo JOBMAN_URL . "/icons/$id.{$icon['extension']}" ?>" />
+					<img src="<?php echo JOBMAN_UPLOAD_URL . "/icons/$id.{$icon['extension']}" ?>" />
 				</td>
 				<td><input class="regular-text code" type="text" name="title[]" value="<?php echo $icon['title'] ?>" /></td>
 				<td><input class="regular-text code" type="file" name="icon[]" /></td>
@@ -671,7 +663,7 @@ function jobman_edit_job( $jobid ) {
 			$jobdata[$key] = $value;
 	}
 ?>
-	<form action="" method="post">
+	<form action="<?php echo admin_url('admin.php?page=jobman-list-jobs') ?>" method="post">
 	<input type="hidden" name="jobmansubmit" value="1" />
 	<input type="hidden" name="jobman-jobid" value="<?php echo $jobid ?>" />
 <?php 
@@ -721,7 +713,7 @@ function jobman_edit_job( $jobid ) {
 			else
 				$checked = '';
 ?>
-					<input type="radio" name="jobman-icon" value="<?php echo $id ?>"<?php echo $checked ?> /> <img src="<?php echo JOBMAN_URL . "/icons/$id.{$icon['extension']}" ?>" /> <?php echo $icon['title'] ?><br/>
+					<input type="radio" name="jobman-icon" value="<?php echo $id ?>"<?php echo $checked ?> /> <img src="<?php echo JOBMAN_UPLOAD_URL . "/icons/$id.{$icon['extension']}" ?>" /> <?php echo $icon['title'] ?><br/>
 <?php
 		}
 	}
@@ -1235,19 +1227,19 @@ function jobman_list_applications() {
 	// Add category filter
 	if( array_key_exists( 'jobman-categories', $_REQUEST ) && is_array( $_REQUEST['jobman-categories'] ) ) {
 		$filtered = true;
-		$args['jobman_category__in'] = array();
+		$args['jcat__in'] = array();
 		foreach( $_REQUEST['jobman-categories'] as $cat ) {
-			$args['jobman_category__in'][] = $cat;
+			$args['jcat__in'][] = $cat;
 		}
 	}
 	
 	// Add star rating filter
-	if( array_key_exists( 'jobman-rating', $_REQUEST ) ) {
+	if( array_key_exists( 'jobman-rating', $_REQUEST ) && is_int( $_REQUEST['jobman-rating'] ) ) {
 	    $args['meta_key'] = 'rating';
 	    $args['meta_value'] = $_REQUEST['jobman-rating'];
 	    $args['meta_compare'] = '>=';
 	}
-	
+
 	$applications = get_posts( $args );
 	
 	$app_displayed = false;
@@ -1327,7 +1319,7 @@ function jobman_list_applications() {
 					$name = $author->display_name;
 				}
 ?>
-				<td><?php echo $name ?></th>
+				<td><?php echo $name ?></td>
 <?php
 			}
 			
@@ -1586,8 +1578,8 @@ function jobman_application_delete() {
 
 		// Delete any files uploaded
 		foreach( $file_fields as $fid ) {
-			if( array_key_exists( "data$fid", $appdata ) ) {
-				$filename = WP_PLUGIN_DIR . '/' . JOBMAN_FOLDER . '/uploads/' . $appdata["data$fid"];
+			if( array_key_exists( "data$fid", $appdata )  && '' != $appdata["data$fid"] ) {
+				$filename = JOBMAN_UPLOAD_DIR . '/uploads/' . $appdata["data$fid"];
 				if( file_exists( $filename ) )
 					unlink( $filename );
 			}
@@ -1960,15 +1952,8 @@ function jobman_categories_updatedb() {
 		}
 	}
 
-	if( array_key_exists( 'related-categories', $_REQUEST ) && $_REQUEST['related-categories'] )
-		$options['related_categories'] = 1;
-	else
-		$options['related_categories'] = 0;
-	
-	if( $options['plugins']['gxs'] )
+	if( get_option( 'jobman_plugin_gxs' ) )
 		do_action( 'sm_rebuild' );
-		
-	update_option( 'jobman_options', $options );
 }
 
 function jobman_icons_updatedb() {
@@ -2014,7 +1999,7 @@ function jobman_icons_updatedb() {
 					$keys = array_keys( $options['icons'] );
 					$id = end( $keys );
 				}
-				move_uploaded_file( $_FILES['icon']['tmp_name'][$ii], WP_PLUGIN_DIR . '/' . JOBMAN_FOLDER . "/icons/$id.$ext");
+				move_uploaded_file( $_FILES['icon']['tmp_name'][$ii], JOBMAN_UPLOAD_DIR . "/icons/$id.$ext");
 			}
 		}
 
@@ -2198,7 +2183,7 @@ function jobman_get_uploaded_file( $filename ) {
 	header( "Content-Disposition: attachment; filename=$filename" );
 	header( 'Content-Transfer-Encoding: binary' );	
 
-	readfile( WP_PLUGIN_DIR . '/' . JOBMAN_FOLDER . "/uploads/$filename");
+	readfile( JOBMAN_UPLOAD_DIR . "/uploads/$filename");
 	
 	exit;
 }

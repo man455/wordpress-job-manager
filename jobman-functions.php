@@ -44,10 +44,10 @@ function jobman_create_widget( $function, $title ) {
 }
 
 function jobman_check_upload_dirs() {
-	if( ! is_writeable( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR ) )
+	if( ! is_writeable( JOBMAN_UPLOAD_DIR . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR ) )
 		return false;
 
-	if( ! is_writeable( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'icons' . DIRECTORY_SEPARATOR ) )
+	if( ! is_writeable( JOBMAN_UPLOAD_DIR . DIRECTORY_SEPARATOR . 'icons' . DIRECTORY_SEPARATOR ) )
 		return false;
 
 	return true;
@@ -67,18 +67,14 @@ function jobman_page_taxonomy_setup() {
 	register_post_type( 'jobman_email', array( 'exclude_from_search' => true ) );
 
 	// Create our new taxonomy thing
-	$options = get_option( 'jobman_options' );
-	
-	$root = get_page( $options['main_page'] );
-	$url = get_page_uri( $root->ID );
-
-	register_taxonomy( 'jobman_category', array( 'jobman_job', 'jobman_app' ), array( 'hierarchical' => false, 'label' => __( 'Category', 'series' ), 'query_var' => 'jcat', 'rewrite' => $url ) );
+	register_taxonomy( 'jobman_category', array( 'jobman_job', 'jobman_app' ), array( 'hierarchical' => false, 'label' => __( 'Category', 'jobman' ), 'query_var' => 'jcat' ) );
 }
 
 function jobman_page_hierarchical_setup( $types ) {
 	$types[] = 'jobman_job';
 	$types[] = 'jobman_joblist';
 	$types[] = 'jobman_app_form';
+	$types[] = 'jobman_register';
 
 	return $types;
 }

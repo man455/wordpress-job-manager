@@ -307,19 +307,12 @@ function jobman_display_jobs_list( $cat ) {
 			$content .= jobman_display_login();
 	}
 
+	// Remove expired jobs
 	foreach( $jobs as $id => $job ) {
-		// Remove expired jobs
 		$displayenddate = get_post_meta( $job->ID, 'displayenddate', true );
+		
 		if( '' != $displayenddate && strtotime( $displayenddate ) <= time() )
 			unset( $jobs[$id] );
-			
-		// Get related categories
-		if( $options['related_categories'] ) {
-			$categories = wp_get_object_terms( $job->ID, 'jobman_category' );
-			if( count( $categories ) > 0 ) {
-				
-			}
-		}
 	}
 
 	if( count( $jobs ) > 0 ) {
@@ -342,7 +335,7 @@ function jobman_display_jobs_list( $cat ) {
 				$content .= "'><td><a href='" . get_page_link( $job->ID ) . "'>";
 				
 				if( $jobdata['iconid'] && array_key_exists( $jobdata['iconid'], $options['icons'] ) )
-					$content .= '<img src="' . JOBMAN_URL . '/icons/' . $jobdata['iconid'] . '.' . $options['icons'][$jobdata['iconid']]['extension'] . '" title="' . $options['icons'][$jobdata['iconid']]['title'] . '" /><br/>';
+					$content .= '<img src="' . JOBMAN_UPLOAD_URL . '/icons/' . $jobdata['iconid'] . '.' . $options['icons'][$jobdata['iconid']]['extension'] . '" title="' . $options['icons'][$jobdata['iconid']]['title'] . '" /><br/>';
 
 				$content .= $job->post_title . '</a></td>';
 				$content .= '<td>' . $jobdata['salary'] . '</td>';
@@ -955,9 +948,9 @@ function jobman_store_application( $jobid, $cat ) {
 			$parent = $job->ID;
 	}
 	
-	if( NULL == $job && NULL != $cat ) {
+	if( NULL != $cat ) {
 		$cat = get_term_by( 'slug', $cat, 'jobman_category' );
-		if( NULL != $cat ) {
+		if( NULL != $cat && NULL != $job ) {
 			$data = get_posts( "post_type=jobman_joblist&meta_key=_cat&meta_value=$cat->term_id&numberposts=-1" );
 			if( count( $data ) > 0 )
 				$parent = $data[0]->ID;
@@ -979,15 +972,15 @@ function jobman_store_application( $jobid, $cat ) {
 	$appid = wp_insert_post( $page );
 
 	// Add the categories to the page
-	if( NULL != $cat && is_term( $cat->term_id, 'jobman_category' ) )
-		wp_set_object_terms( $appid, $cat->term_id, 'jobman_category', true );
+	if( NULL != $cat && is_term( $cat->slug, 'jobman_category' ) )
+		wp_set_object_terms( $appid, $cat->slug, 'jobman_category', true );
 
 	if( NULL != $job ) {
 		// Get parent (job) categories, and apply them to application
 		$parentcats = wp_get_object_terms( $job->ID, 'jobman_category' );
 		foreach( $parentcats as $pcat ) {
-			if( is_term( $pcat->term_id, 'jobman_category' ) )
-				wp_set_object_terms( $appid, $pcat->term_id, 'jobman_category', true );
+			if( is_term( $pcat->slug, 'jobman_category' ) )
+				wp_set_object_terms( $appid, $pcat->slug, 'jobman_category', true );
 		}
 	}
 	
@@ -1008,7 +1001,7 @@ function jobman_store_application( $jobid, $cat ) {
 						$ext = $matches[1];
 						if( is_uploaded_file( $_FILES["jobman-field-$id"]['tmp_name'] ) ) {
 							$data = "$appid-$id.$ext";
-							move_uploaded_file( $_FILES["jobman-field-$id"]['tmp_name'], WP_PLUGIN_DIR . '/' . JOBMAN_FOLDER . "/uploads/$data");
+							move_uploaded_file( $_FILES["jobman-field-$id"]['tmp_name'], JOBMAN_UPLOAD_DIR . "/uploads/$data");
 						}
 					}
 					break;
