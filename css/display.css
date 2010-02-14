@@ -46,16 +46,6 @@ table.jobs-table, table.job-table, table.job-apply-table {
 
 table.jobs-table th, table.job-table th {
 	font-weight: bold;
-	width: 100px;
-	text-align: left;
-}
-
-table.highlighted {
-	background-color: #eef;
-}
-
-table.jobs-table tr.highlighted td{
-	background-color: #eef;
 }
 
 td.jobs-moreinfo, td.jobs-applynow {

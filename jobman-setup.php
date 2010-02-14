@@ -36,7 +36,6 @@ function jobman_create_default_settings() {
 					'default_email' => get_option( 'admin_email' ),
 					'list_type' => 'full',
 					'application_email_from' => 4,
-					'application_email_from_fields' => array( 2, 3 ),
 					'application_email_subject_text' => 'Job Application:',
 					'application_email_subject_fields' => array( 2, 3 ),
 					'promo_link' => 0,
@@ -46,31 +45,8 @@ function jobman_create_default_settings() {
 					'loginform_category' => 1,
 					'loginform_job' => 1,
 					'loginform_apply' => 1,
-					'related_categories' => 1,
-					'sort_by' => '',
-					'sort_order' => '',
-					'highlighted_behaviour' => 'sticky',
-					'uninstall' => array(
-									'options' => 1,
-									'jobs' => 1,
-									'applications' => 1,
-									'categories' => 1
-								),
-					'text' => array( 
-								'main_before' => '',
-								'main_after' => '',
-								'category_before' => '',
-								'category_after' => '',
-								'job_before' => '',
-								'job_after' => '',
-								'apply_before' => '',
-								'apply_after' => '',
-								'job_title_prefix' => __( 'Job', 'jobman' ) . ': ',
-								'application_acceptance' => __( 'Thank you for your application! We\'ll check it out, and get back to you soon!', 'jobman' )
-							),
 					'plugins' => array(
-									'gxs' => 1,
-									'sicaptcha' => 0
+									'gxs' => 1
 								)
 				);
 	update_option( 'jobman_options', $options );
@@ -135,47 +111,12 @@ function jobman_upgrade_settings( $oldversion ) {
 		mkdir( JOBMAN_UPLOAD_DIR . '/uploads', 0777, true );
 		mkdir( JOBMAN_UPLOAD_DIR . '/icons', 0777, true );
 	}
-	
-	if( $oldversion < 11 ) {
-		$options = get_option( 'jobman_options' );
-		
-		$options['related_categories'] = 1;
-		$options['sort_by'] = '';
-		$options['sort_order'] = '';
-		$options['highlighted_behaviour'] = 'sticky';
-		
-		$options['uninstall'] = array(
-									'options' => 1,
-									'jobs' => 1,
-									'applications' => 1,
-									'categories' => 1
-								);
-		
-		$options['text'] = array( 
-								'main_before' => '',
-								'main_after' => '',
-								'category_before' => '',
-								'category_after' => '',
-								'job_before' => '',
-								'job_after' => '',
-								'apply_before' => '',
-								'apply_after' => '',
-								'job_title_prefix' => __( 'Job', 'jobman' ) . ': ',
-								'application_acceptance' => __( 'Thank you for your application! We\'ll check it out, and get back to you soon!', 'jobman' )
-							);
-							
-		$options['application_email_from_fields'] = array();
-		$options['plugins']['sicaptcha'] = 0;
-		
-		update_option( 'jobman_options', $options );
-	}
 }
 
 function jobman_uninstall() {
 	jobman_drop_db();
 
-	if( $options['uninstall']['options'] )
-		delete_option( 'jobman_options' );
+	delete_option( 'jobman_options' );
 }
 
 ?>

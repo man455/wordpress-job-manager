@@ -60,37 +60,16 @@ Job Manager will add all of your job lists and job detail pages to your sitemap,
 
 == Credits ==
 
+= Translations =
+
+* French Translation (0.5), provided by [Fabrice Fotso](http://www.procure-smart.com/)
+
 Print Icon courtesy of [VisualPharm](http://www.visualpharm.com/), under a [CC BY-ND](http://creativecommons.org/licenses/by-nd/3.0/) license.
 
 == Changelog ==
 
-= 0.6 =
-* ADDED: 'Related Categories' section to job list displays
-* ADDED: Mandatory fields filter
-* ADDED: Widgets for Latest Jobs, Categories and Highlighted Jobs
-* ADDED: Option to change sort order of job lists
-* ADDED: Options to highlight jobs, and stick them to the top of job lists
-* ADDED: Exporting Applications to CSV
-* ADDED: Link on jobs list to applications for that job
-* ADDED: IDs to all admin tables, so they can be styled more easily
-* ADDED: Uninstall options
-* ADDED: Options to change text before/after data being displayed
-* ADDED: Option to change Job title prefix
-* ADDED: Option to change Application Acceptance message
-* ADDED: Option to set the name in the "From" field of application emails
-* ADDED: Support for CAPTCHAs, through the [SI CAPTCHA](http://wordpress.org/extend/plugins/si-captcha-for-wordpress/) plugin.
-* CHANGED: Removed pages hack for displaying categories. This will change category list permalinks if nice permalinks are off.
-* CHANGED: Split admin and display settings into two admin pages
-* CHANGED: HTML fields now stretch across both columns of the application table. The label is no longer displayed.
-* CHANGED: Can now remove ratings from applications
-* FIXED: Some small string changes for clarity
-* FIXED: Added category links to Google XML Sitemap
-* FIXED: Admin CSS/JS are only loaded on the appropriate pages
-* FIXED: Job list filter not filtering by categories
-* FIXED: Some PHP warnings
-* FIXED: No empty message on emails list
-* FIXED: Added some CSS to make Full lists line up nicely
-* FIXED: WP themes could think they were on the front page when in Job Manager
+= 0.5.4 =
+* ADDED: French Translation, provided by [Fabrice Fotso](http://www.procure-smart.com/)
 
 = 0.5.3 =
 * FIXED: Application list not filtering correctly if no rating selected
