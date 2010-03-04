@@ -58,7 +58,23 @@ function jobman_list_applications() {
 ?>
 					<tr>
 						<th scope="row"><?php _e( 'Registered Applicant', 'jobman' ) ?>:</th>
-						<td><input type="text" name="jobman-applicant" value="<?php echo ( array_key_exists( 'jobman-applicant', $_REQUEST ) )?( $_REQUEST['jobman-applicant'] ):( '' ) ?>" /></td>
+						<td><select name="jobman-applicant">
+							<option value=""><?php _e( 'All Applicants', 'jobman' ) ?></option>
+<?php
+		$users = $wpdb->get_results( "SELECT ID, display_name FROM $wpdb->users ORDER BY display_name ASC" );
+		
+		if(count( $users ) > 0) {
+			foreach( $users as $user ) {
+				$checked = '';
+				if( array_key_exists( 'jobman-applicant', $_REQUEST ) && $_REQUEST['jobman-applicant'] == $user->ID )
+					$checked = ' checked="checked"';
+?>
+							<option value="<?php echo $user->ID ?>"<?php echo $checked ?>><?php echo $user->display_name ?></option>
+<?php
+			}
+		}
+?>
+						</select></td>
 					</tr>
 <?php
 	}
@@ -247,7 +263,7 @@ function jobman_list_applications() {
 	
 	// Add applicant filter
 	if( array_key_exists( 'jobman-applicant', $_REQUEST ) )
-		$args['author_name'] = $_REQUEST['jobman-applicant'];
+		$args['author'] = $_REQUEST['jobman-applicant'];
 	
 	// Add category filter
 	// Removed this until WP_Query supports *__in for custom taxonomy.
@@ -330,7 +346,6 @@ function jobman_list_applications() {
 							break;
 						case 'radio':
 						case 'checkbox':
-						case 'select':
 							if( is_array( $_REQUEST["jobman-field-$id"] ) ) {
 								$data = split( ',', $appdata["data$id"] );
 								foreach( $_REQUEST["jobman-field-$id"] as $selected ) {
@@ -398,7 +413,6 @@ function jobman_list_applications() {
 								case 'checkbox':
 								case 'date':
 								case 'textarea':
-								case 'select':
 									$data = $appdata["data$id"];
 									break;
 								case 'file':
@@ -555,7 +569,6 @@ function jobman_application_display_details( $appid ) {
 				case 'checkbox':
 				case 'date':
 				case 'textarea':
-				case 'select':
 					echo $item;
 					break;
 				case 'file':
@@ -700,7 +713,6 @@ function jobman_get_application_csv() {
 							case 'checkbox':
 							case 'date':
 							case 'textarea':
-							case 'select':
 								$data[] = $item;
 								break;
 							case 'file':
