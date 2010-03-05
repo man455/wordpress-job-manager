@@ -10,7 +10,6 @@ function jobman_application_setup() {
 	$fieldtypes = array(
 						'text' => __( 'Text Input', 'jobman' ),
 						'radio' => __( 'Radio Buttons', 'jobman' ),
-						'select' => __( 'Select Dropdown', 'jobman' ),
 						'checkbox' => __( 'Checkboxes', 'jobman' ),
 						'textarea' => __( 'Large Text Input (textarea)', 'jobman' ),
 						'date' => __( 'Date Selector', 'jobman' ),
@@ -166,7 +165,7 @@ function jobman_application_setup_updatedb() {
 			$mandatory = 0;
 			if( array_key_exists( 'new', $_REQUEST['jobman-listdisplay'] ) && array_key_exists( $newcount, $_REQUEST['jobman-listdisplay']['new'] ) )
 				$listdisplay = 1;
-			if( array_key_exists( 'new', $_REQUEST['jobman-mandatory'] ) && array_key_exists( $newcount, $_REQUEST['jobman-mandatory']['new'] ) )
+			if( is_array( $_REQUEST['jobman-mandatory'] ) && array_key_exists( 'new', $_REQUEST['jobman-mandatory'] ) && array_key_exists( $newcount, $_REQUEST['jobman-mandatory']['new'] ) )
 				$mandatory = 1;
 
 			// INSERT new field
@@ -193,7 +192,7 @@ function jobman_application_setup_updatedb() {
 			$mandatory = 0;
 			if( array_key_exists( $id, $_REQUEST['jobman-listdisplay'] ) )
 				$listdisplay = 1;
-			if( array_key_exists( $id, $_REQUEST['jobman-mandatory'] ) )
+			if( is_array( $_REQUEST['jobman-mandatory'] ) && array_key_exists( $id, $_REQUEST['jobman-mandatory'] ) )
 				$mandatory = 1;
 
 			// UPDATE existing field
