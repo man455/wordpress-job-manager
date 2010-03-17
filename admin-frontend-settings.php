@@ -12,10 +12,6 @@ function jobman_display_conf() {
 		check_admin_referer( 'jobman-template-updatedb' );
 		jobman_template_updatedb();
 	}
-	else if( array_key_exists( 'jobmanapptemplatesubmit', $_REQUEST ) ) {
-		check_admin_referer( 'jobman-app-template-updatedb' );
-		jobman_app_template_updatedb();
-	}
 	else if( array_key_exists( 'jobmanwraptextsubmit', $_REQUEST ) ) {
 		check_admin_referer( 'jobman-wraptext-updatedb' );
 		jobman_wrap_text_updatedb();
@@ -31,11 +27,11 @@ function jobman_display_conf() {
 	if( ! get_option( 'pento_consulting' ) ) {
 		$widths = array( '78%', '20%' );
 		$functions = array(
-						array( 'jobman_print_display_settings_box', 'jobman_print_sort_box', 'jobman_print_template_box', 'jobman_print_app_template_box', 'jobman_print_misc_text_box', 'jobman_print_wrap_text_box' ),
+						array( 'jobman_print_display_settings_box', 'jobman_print_sort_box', 'jobman_print_template_box', 'jobman_print_misc_text_box', 'jobman_print_wrap_text_box' ),
 						array( 'jobman_print_donate_box', 'jobman_print_about_box' )
 					);
 		$titles = array(
-					array( __( 'Display Settings', 'jobman' ), __( 'Job List Sorting', 'jobman' ), __( 'Job Templates', 'jobman' ), __( 'Application Form Template', 'jobman' ), __( 'Miscellaneous Text', 'jobman' ), __( 'Page Text', 'jobman' ) ),
+					array( __( 'Display Settings', 'jobman' ), __( 'Job List Sorting', 'jobman' ), __( 'Job Templates', 'jobman' ), __( 'Miscellaneous Text', 'jobman' ), __( 'Page Text', 'jobman' ) ),
 					array( __( 'Donate', 'jobman' ), __( 'About This Plugin', 'jobman' ))
 				);
 	}
@@ -43,11 +39,11 @@ function jobman_display_conf() {
 		$widths = array( '49%', '49%' );
 		$functions = array(
 						array( 'jobman_print_display_settings_box', 'jobman_print_misc_text_box', 'jobman_print_wrap_text_box' ),
-						array( 'jobman_print_sort_box', 'jobman_print_template_box', 'jobman_print_app_template_box' )
+						array( 'jobman_print_sort_box', 'jobman_print_template_box' )
 					);
 		$titles = array(
 					array( __( 'Display Settings', 'jobman' ), __( 'Miscellaneous Text', 'jobman' ), __( 'Page Text', 'jobman' ) ),
-					array( __( 'Job List Sorting', 'jobman' ), __( 'Job Templates', 'jobman' ), __( 'Application Form Template', 'jobman' ) )
+					array( __( 'Job List Sorting', 'jobman' ), __( 'Job Templates', 'jobman' ) )
 				);
 	}
 	jobman_create_dashboard( $widths, $functions, $titles );
@@ -172,12 +168,7 @@ function jobman_print_template_box() {
 			<code>[if_job_categories]<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<?php _e( 'Categories', 'jobman' ) ?>: [job_categories]<br/>
 [/if_job_categories]
-			</code><br/><br/>
-			
-			<strong><?php _e( 'Multi-Applications', 'jobman' ) ?></strong><br/>
-			<?php _e( 'These shortcodes are only valid if the "Allow Multi-Applications" option is checked under Admin Options. If it is not checked, they will not display.', 'jobman' ) ?><br/>
-			<tt>[job_checkbox]</tt> - <?php _e( 'While inside a <tt>[job_field_loop]</tt>, this will display a checkbox associated with the current job.', 'jobman' ) ?><br/>
-			<tt>[job_apply_multi]...[/job_apply_multi]</tt> - <?php _e( 'This will display a button to allow the applicant to apply for all checked jobs, with the contained text as the button text.', 'jobman' ) ?>
+			</code>
 		</p>
 		<form action="" method="post">
 		<input type="hidden" name="jobmantemplatesubmit" value="1" />
@@ -194,55 +185,6 @@ function jobman_print_template_box() {
 				<td><textarea name="job" class="large-text code" rows="7"><?php echo $options['templates']['job'] ?></textarea></td>
 			</tr>
 		</table>
-		<p class="submit"><input type="submit" name="submit"  class="button-primary" value="<?php _e( 'Update Template Settings', 'jobman' ) ?>" /></p>
-		</form>
-<?php
-}
-
-function jobman_print_app_template_box() {
-	$options = get_option( 'jobman_options' );
-?>
-		<p><?php _e( "This setting allows you to define the template for displaying the application form. If you're happy with the current application form, just leave this blank, as you'll need to update it each time you add a new field to the application form.", 'jobman' ) ?></p>
-		<p><?php _e( 'If you do want to do this, you will need to make use of the available shortcodes.', 'jobman' ) ?></p>
-		<p>
-			<strong><?php _e( 'Application Form', 'jobman' ) ?></strong><br/>
-			<tt>[job_links]</tt> - <?php _e( 'Display a list of links to the jobs being applied for.', 'jobman' ) ?><br/>
-			<tt>[job_list]</tt> - <?php _e( 'This will display a list of jobs to select from. If a category application form is being used, it will display all the jobs in that category. Otherwise, it will display all jobs. It has one optional attribute:', 'jobman' ) ?><br/>
-			<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type</tt> - <?php _e( 'Can be set to one of: "select", "individual" or "popout". "select" will show a dropdown box, "individual" will show a list with radio buttons or checkboxes, "popout" is the same as "individual", but only shows the list when it is clicked on.', 'jobman' ) ?><br/>
-			<tt>[job_app_submit]...[/job_app_submit]</tt> - <?php _e( 'Display a submit button for the application form, with the contained text as the button text.', 'jobman' ) ?><br/><br/>
-			
-			<strong><?php _e( 'Custom Application Field Information', 'jobman' ) ?></strong><br/>
-			<?php _e( "For each of the Custom Job Fields defined, there are several shortcodes defined. Note that the numbers ('n' in the samples) won't change, even if you re-order, add or delete Application Fields.", 'jobman' ) ?><br/><br/>
-			<tt>[job_app_field<em>n</em>_label]</tt> - <?php _e( 'Display the field label', 'jobman' ) ?><br/>
-			<tt>[job_app_field<em>n</em>]</tt> - <?php _e( 'Display the field input element. ', 'jobman' ) ?><br/>
-			<tt>[job_app_field<em>n</em>_mandatory]</tt> - <?php _e( 'If the field has been marked as mandatory, this will display the word "mandatory".', 'jobman' ) ?><br/><br/>
-			
-			<strong><?php _e( 'Custom Application Fields', 'jobman' ) ?></strong><br/>
-<?php
-	foreach( $options['fields'] as $fid => $field ) {
-		$fieldlabel = '';
-		if( ! empty( $field['label'] ) )
-			$fieldlabel = $field['label'];
-		elseif( ! empty( $field['data'] ) )
-			$fieldlabel = $field['data'];
-		else
-			$fieldlabel = '(' . __( 'No Label', 'jobman' ) . ')';
-		
-		echo "<tt>[job_app_field{$fid}_label], [job_app_field{$fid}], [job_app_field{$fid}_mandatory]</tt> - $fieldlabel ({$field['type']})<br/>";
-	}
-?>
-			<br/>
-			
-			<strong><?php _e( 'Conditionals', 'jobman' ) ?></strong><br/>
-			<?php _e( 'All of the shortcodes defined above can be prefixed with <tt>if_</tt> to turn them into a conditional statement. For example, if you wanted to display an asterisk "*" next to the label of a mandatory field, you could put in the template:', 'jobman' ) ?><br/><br/>
-			<code>[job_app_field1_label] [if_job_app_field1_mandatory]*[/if_job_app_field1_mandatory]</code>
-		</p>
-		<form action="" method="post">
-		<input type="hidden" name="jobmanapptemplatesubmit" value="1" />
-<?php 
-	wp_nonce_field( 'jobman-app-template-updatedb' ); 
-?>
-		<textarea name="application-form" class="large-text code" rows="7"><?php echo $options['templates']['application_form'] ?></textarea>
 		<p class="submit"><input type="submit" name="submit"  class="button-primary" value="<?php _e( 'Update Template Settings', 'jobman' ) ?>" /></p>
 		</form>
 <?php
@@ -341,14 +283,6 @@ function jobman_template_updatedb() {
 	
 	$options['templates']['job_list'] = stripslashes( $_REQUEST['job-list'] );
 	$options['templates']['job'] = stripslashes( $_REQUEST['job'] );
-
-	update_option( 'jobman_options', $options );
-}
-
-function jobman_app_template_updatedb() {
-	$options = get_option( 'jobman_options' );
-	
-	$options['templates']['application_form'] = stripslashes( $_REQUEST['application-form'] );
 
 	update_option( 'jobman_options', $options );
 }

@@ -1,5 +1,6 @@
 <?php
 function jobman_display_apply( $jobid, $cat = NULL ) {
+	global $current_user, $si_image_captcha;
 	get_currentuserinfo();
 
 	$options = get_option( 'jobman_options' );
@@ -52,9 +53,7 @@ function jobman_display_apply( $jobid, $cat = NULL ) {
 	if( $options['user_registration'] && $options['user_registration_required'] && ! is_user_logged_in() ) {
 		// Skip the application form if the user hasn't registered yet, and we're enforcing registration. 
 		
-		$pleaseregister = '<p>' . __( 'Before completing your application, please login using the form above, or register using the form below.', 'jobman' ) . '</p>';
-		
-		$content .= apply_filters( 'jobman_pleaseregister_html', $pleaseregister );
+		$content .= '<p>' . __( 'Before completing your application, please login using the form above, or register using the form below.', 'jobman' ) . '</p>';
 		
 		$reg = jobman_display_register();
 		$content .= $reg[0]->post_content;
@@ -99,39 +98,6 @@ function jobman_display_apply( $jobid, $cat = NULL ) {
 	$content .= '<input type="hidden" name="jobman-jobid" value="' . $jobid . '">';
 	$content .= '<input type="hidden" name="jobman-categoryid" value="' . implode( ',', $cat_arr ) . '">';
 	
-	if( array_key_exists( 'jobman-joblist', $_REQUEST ) )
-		$content .= '<input type="hidden" name="jobman-joblist" value="' . implode( ',', $_REQUEST['jobman-joblist'] ) . '">';
-	
-	if( empty( $options['templates']['application_form'] ) ) {
-		$content .= jobman_display_apply_generated( $foundjob, $job );
-	}
-	else {
-		global $jobman_app_field_shortcodes, $jobman_app_shortcodes, $jobman_shortcode_job, $jobman_shortcode_categories;
-		
-		$jobman_shortcode_job = $job;
-		$jobman_shortcode_categories = $cat_arr;
-		
-		jobman_add_app_field_shortcodes( $jobman_app_field_shortcodes );
-		jobman_add_app_shortcodes( $jobman_app_shortcodes );
-		
-		$content .= do_shortcode( $options['templates']['application_form'] );
-		
-		jobman_remove_shortcodes( array_merge( $jobman_app_field_shortcodes, $jobman_app_shortcodes ) );
-	}
-	
-	$content .= '</form>';
-
-	$page->post_content = $content;
-		
-	return array( $page );
-}
-
-function jobman_display_apply_generated( $foundjob = false, $job = NULL ) {
-	global $current_user, $si_image_captcha;
-	$options = get_option( 'jobman_options' );
-	
-	$content = '';
-	
 	if( $foundjob )
 		$content .= '<p>' . __( 'Title', 'jobman' ) . ': <a href="'. get_page_link( $job->ID ) . '">' . $job->post_title . '</a></p>';
 
@@ -159,6 +125,8 @@ function jobman_display_apply_generated( $foundjob = false, $job = NULL ) {
 				$rowcount = 1;
 			}
 
+			$data = strip_tags( $field['data'] );
+
 			// Auto-populate logged in user email address
 			if( $id == $options['application_email_from'] && '' == $data && is_user_logged_in() ) {
 			    $data = $current_user->user_email;
@@ -176,19 +144,64 @@ function jobman_display_apply_generated( $foundjob = false, $job = NULL ) {
 			
 			switch( $field['type'] ) {
 				case 'text':
+					if( '' != $field['label'] )
+						$content .= "<th scope='row'>{$field['label']}$mandatory</th>";
+					else
+						$content .= '<td class="th"></td>';
+					
+					$content .= "<td><input type='text' name='jobman-field-$id' value='$data' /></td></tr>";
+					break;
 				case 'radio':
+					if( '' != $field['label'] )
+						$content .= "<th scope='row'>{$field['label']}$mandatory</th><td>";
+					else
+						$content .= '<td class="th"></td><td>';
+					
+					$values = split( "\n", $data );
+					$display_values = split( "\n", $field['data'] );
+					
+					foreach( $values as $key => $value ) {
+						$content .= "<input type='radio' name='jobman-field-$id' value='" . trim( $value ) . "' /> {$display_values[$key]}<br/>";
+					}
+					$content .= '</td></tr>';
+					break;
 				case 'checkbox':
+					if( '' != $field['label'] )
+						$content .= "<th scope='row'>{$field['label']}$mandatory</th><td>";
+					else
+						$content .= '<td class="th"></td><td>';
+
+					$values = split( "\n", $data );
+					$display_values = split( "\n", $field['data'] );
+					
+					foreach( $values as $key => $value ) {
+						$content .= "<input type='checkbox' name='jobman-field-{$id}[]' value='" . trim( $value ) . "' /> {$display_values[$key]}<br/>";
+					}
+					$content .= '</td></tr>';
+					break;
 				case 'textarea':
-				case 'date':
-				case 'file':
-				case 'select':
-				case 'geoloc':
 					if( '' != $field['label'] )
 						$content .= "<th scope='row'>{$field['label']}$mandatory</th>";
 					else
 						$content .= '<td class="th"></td>';
 
-					$content .= '<td>' . jobman_app_field_input_html( $id, $field, $data ) . '</td></tr>';
+					$content .= "<td><textarea name='jobman-field-$id'>{$field['data']}</textarea></td></tr>";
+					break;
+				case 'date':
+					if( '' != $field['label'] )
+						$content .= "<th scope='row'>{$field['label']}$mandatory</th>";
+					else
+						$content .= '<td class="th"></td>';
+
+					$content .= "<td><input type='text' class='datepicker' name='jobman-field-$id' value='$data' /></td></tr>";
+					break;
+				case 'file':
+					if( '' != $field['label'] )
+						$content .= "<th scope='row'>{$field['label']}$mandatory</th>";
+					else
+						$content .= '<td class="th"></td>';
+
+					$content .= "<td><input type='file' name='jobman-field-$id' /></td></tr>";
 					break;
 				case 'heading':
 					if( ! $start )
@@ -201,7 +214,7 @@ function jobman_display_apply_generated( $foundjob = false, $job = NULL ) {
 					$rowcount = 0;
 					break;
 				case 'html':
-					$content .= '<td colspan="2">' . jobman_app_field_input_html( $id, $field, $data ) . '</td></tr>';
+					$content .= "<td colspan='2'>{$field['data']}</td></tr>";
 					break;
 				case 'blank':
 					$content .= '<td colspan="2">&nbsp;</td></tr>';
@@ -224,65 +237,9 @@ function jobman_display_apply_generated( $foundjob = false, $job = NULL ) {
 	$content .= '<tr><td colspan="2" class="submit"><input type="submit" name="submit"  class="button-primary" value="' . __( 'Submit Your Application', 'jobman' ) . '" /></td></tr>';
 	$content .= '</table>';
 
-	return $content;
-}
-
-function jobman_app_field_input_html( $id, $field, $data ) {
-	$content = '';
-	
-	$data = esc_attr( $data );
-
-	switch( $field['type'] ) {
-		case 'text':
-			return "<input type='text' name='jobman-field-$id' value='$data' />";
-		case 'radio':
-			$values = split( "\n", $data );
-			$display_values = split( "\n", $field['data'] );
-			
-			foreach( $values as $key => $value ) {
-				$content .= "<input type='radio' name='jobman-field-$id' value='" . trim( $value ) . "' /> {$display_values[$key]}";
-				if( count( $values ) > 1 )
-					$content .= '<br/>';
-			}
-			return $content;
-		case 'checkbox':
-			$values = split( "\n", $data );
-			$display_values = split( "\n", $field['data'] );
-			
-			foreach( $values as $key => $value ) {
-				$content .= "<input type='checkbox' name='jobman-field-{$id}[]' value='" . trim( $value ) . "' /> {$display_values[$key]}";
-				if( count( $values ) > 1 )
-					$content .= '<br/>';
-			}
-			return $content;
-		case 'select':
-			$values = split( "\n", $data );
-			$display_values = split( "\n", $field['data'] );
-			
-			$content .= "<select name='jobman-field-{$id}[]'>";
-			foreach( $values as $key => $value ) {
-				$content .= "<option value='" . trim( $value ) . "' /> {$display_values[$key]}</option>";
-			}
-			$content .= "</select>";
-			return $content;
-		case 'textarea':
-			return "<textarea name='jobman-field-$id'>{$field['data']}</textarea>";
-		case 'date':
-			return "<input type='text' class='datepicker' name='jobman-field-$id' value='$data' />";
-		case 'file':
-			return "<input type='file' name='jobman-field-$id' />";
-		case 'geoloc':
-			$content .= "<input type='hidden' class='jobman-geoloc-data' name='jobman-field-$id' />";
-			$content .= "<input type='hidden' class='jobman-geoloc-original-display' name='jobman-field-original-display-$id' />";
-			$content .= "<input type='text' class='jobman-geoloc-display' name='jobman-field-display-$id' />";
-			return $content;
-		case 'html':
-			return $field['data'];
-		case 'heading':
-		case 'blank':
-		default:
-			return NULL;
-	}
+	$page->post_content = $content;
+		
+	return array( $page );
 }
 
 function jobman_store_application( $jobid, $cat ) {
@@ -293,19 +250,21 @@ function jobman_store_application( $jobid, $cat ) {
 	}
 
 	$dir = dirname( $_SERVER['SCRIPT_FILENAME'] );
-
-	require_once( "$dir/wp-admin/includes/file.php" );
 	require_once( "$dir/wp-admin/includes/image.php" );
-	require_once( "$dir/wp-admin/includes/media.php" );
 
 	$options = get_option( 'jobman_options' );
 	
-	$fields = $options['fields'];
+	$parent = $options['main_page'];
 	
 	$job = NULL;
-	if( -1 != $jobid )
+	if( -1 != $jobid ) {
 		$job = get_post( $jobid );
-
+		if( NULL != $job )
+			$parent = $job->ID;
+	}
+	
+	$fields = $options['fields'];
+	
 	// Workaround for WP to Twitter plugin tweeting about new application
 	$_POST['jd_tweet_this'] = 'no';
 	
@@ -316,12 +275,12 @@ function jobman_store_application( $jobid, $cat ) {
 				'post_type' => 'jobman_app',
 				'post_content' => '',
 				'post_title' => __( 'Application', 'jobman' ),
-				'post_parent' => $options['main_page']
+				'post_parent' => $parent
 			);
 
 	$appid = wp_insert_post( $page );
 
-	// Add the categories to the application
+	// Add the categories to the page
 	$append = false;
 	if( NULL != $cat && is_term( $cat->slug, 'jobman_category' ) ) {
 		wp_set_object_terms( $appid, $cat->slug, 'jobman_category', false );
@@ -339,30 +298,6 @@ function jobman_store_application( $jobid, $cat ) {
 		}
 	}
 	
-	// Add the jobs to the application
-	$jobs = array();
-	if( -1 != $jobid )
-		$jobs[] = $jobid;
-		
-	if( array_key_exists( 'jobman-joblist', $_REQUEST ) ) {
-		$joblist = explode( ',', $_REQUEST['jobman-joblist'] );
-		$jobs = array_merge( $jobs, $joblist );
-	}
-	
-	// Add any extra jobs to the application
-	if( array_key_exists( 'jobman-jobselect', $_REQUEST ) && !empty( $_REQUEST['jobman-jobselect'] ) ) {
-		if( is_array( $_REQUEST['jobman-jobselect'] ) )
-			$jobs = array_merge( $jobs, $_REQUEST['jobman-jobselect'] );
-		else
-			$jobs[] = $_REQUEST['jobman-jobselect'];
-	}
-	
-	$jobs = array_unique( $jobs );
-	
-	foreach( $jobs as $data ) {
-		add_post_meta( $appid, 'job', $data, false );
-	}
-	
 	if( count( $fields ) > 0 ) {
 		foreach( $fields as $fid => $field ) {
 			if($field['type'] != 'file' && ( ! array_key_exists( "jobman-field-$fid", $_REQUEST ) || '' == $_REQUEST["jobman-field-$fid"] ) )
@@ -375,24 +310,29 @@ function jobman_store_application( $jobid, $cat ) {
 			switch( $field['type'] ) {
 				case 'file':
 					if( is_uploaded_file( $_FILES["jobman-field-$fid"]['tmp_name'] ) ) {
-							$data = media_handle_upload( "jobman-field-$fid", $appid, array( 'post_status' => 'private' ) );
-							add_post_meta( $data, '_jobman_attachment', 1, true );
-							add_post_meta( $data, '_jobman_attachment_upload', 1, true );
+							$upload = wp_upload_bits( $_FILES["jobman-field-$fid"]['name'], NULL, file_get_contents( $_FILES["jobman-field-$fid"]['tmp_name'] ) );
+							if( ! $upload['error'] ) {
+								$filetype = wp_check_filetype( $upload['file'] );
+								$attachment = array(
+												'post_title' => '',
+												'post_content' => '',
+												'post_status' => 'private',
+												'post_mime_type' => $filetype['type']
+											);
+								$data = wp_insert_attachment( $attachment, $upload['file'], $appid );
+								$attach_data = wp_generate_attachment_metadata( $data, $upload['file'] );
+								wp_update_attachment_metadata( $data, $attach_data );
+
+								add_post_meta( $data, '_jobman_attachment', 1, true );
+								add_post_meta( $data, '_jobman_attachment_upload', 1, true );
+							}
 					}
 					break;
-				case 'geoloc':
-					if( $_REQUEST["jobman-field-original-display-$fid"] == $_REQUEST["jobman-field-display-$fid"] )
-						$data = $_REQUEST["jobman-field-$fid"];
-					else
-						$data = $_REQUEST["jobman-field-display-$fid"];
-						
-					add_post_meta( $appid, "data-display$fid", $_REQUEST["jobman-field-display-$fid"], true );
+				case 'checkbox':
+					$data = implode( ', ', $_REQUEST["jobman-field-$fid"] );
 					break;
 				default:
-					if( is_array( $_REQUEST["jobman-field-$fid"] ) )
-						$data = implode( ', ', $_REQUEST["jobman-field-$fid"] );
-					else
-						$data = $_REQUEST["jobman-field-$fid"];
+					$data = $_REQUEST["jobman-field-$fid"];
 			}
 			
 			add_post_meta( $appid, "data$fid", $data, true );
@@ -425,7 +365,7 @@ function jobman_check_filters( $jobid, $cat ) {
 				$data = $_REQUEST["jobman-field-$id"];
 
 			if( 'checkbox' != $field['type'] )
-				$data = esc_attr( trim( $data ) );
+				$data = trim( $data );
 			else if( ! is_array( $data ) )
 				$data = array();
 
@@ -637,7 +577,7 @@ function jobman_email_application( $appid, $sendto = '' ) {
 	
 	$msg = '';
 	
-	$msg .= __( 'Application Link', 'jobman' ) . ': ' . admin_url( 'admin.php?page=jobman-list-applications&appid=' . $app->ID ) . PHP_EOL;
+	$msg .= __( 'Application Link', 'jobman' ) . ': ' . admin_url( 'admin.php?page=jobman-list-applications&amp;appid=' . $app->ID ) . PHP_EOL;
 
 	$parent = get_post( $app->post_parent );
 	if( NULL != $parent && 'jobman_job' == $parent->post_type ) {
@@ -660,7 +600,6 @@ function jobman_email_application( $appid, $sendto = '' ) {
 				case 'radio':
 				case 'checkbox':
 				case 'date':
-				case 'select':
 					$msg .= $field['label'] . ': ' . $appdata['data'.$id] . PHP_EOL;
 					break;
 				case 'textarea':
@@ -668,10 +607,6 @@ function jobman_email_application( $appid, $sendto = '' ) {
 					break;
 				case 'file':
 					$msg .= $field['label'] . ': ' . wp_get_attachment_url( $appdata["data$id"] ) . PHP_EOL;
-					break;
-				case 'geoloc':
-					$msg .= $field['label'] . ': ' . $appdata['data-display'.$id] . ' (' . $appdata['data'.$id] . ')' . PHP_EOL;
-					$msg .= 'http://maps.google.com/maps?q=' . urlencode( $appdata['data'.$id] ) . PHP_EOL;
 					break;
 			}
 		}

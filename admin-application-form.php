@@ -10,12 +10,10 @@ function jobman_application_setup() {
 	$fieldtypes = array(
 						'text' => __( 'Text Input', 'jobman' ),
 						'radio' => __( 'Radio Buttons', 'jobman' ),
-						'select' => __( 'Select Dropdown', 'jobman' ),
 						'checkbox' => __( 'Checkboxes', 'jobman' ),
 						'textarea' => __( 'Large Text Input (textarea)', 'jobman' ),
 						'date' => __( 'Date Selector', 'jobman' ),
 						'file' => __( 'File Upload', 'jobman' ),
-						'geoloc' => __( 'Geolocation', 'jobman' ),
 						'heading' => __( 'Heading', 'jobman' ),
 						'html' => __( 'HTML Code', 'jobman' ),
 						'blank' => __( 'Blank Space', 'jobman' )
@@ -111,14 +109,14 @@ function jobman_application_setup() {
 	$template .= '<select name="jobman-type[]">';
 
 	foreach( $fieldtypes as $type => $label ) {
-		$template .= "<option value='$type'>$label</option>";
+		$template .= '<option value="' . $type . '">' . $label . '</option>';
 	}
-	$template .= '</select>';
+	$template .= '</select><br/>';
 	$template .= '<input type="checkbox" name="jobman-listdisplay" value="1" />' . __( 'Show this field in the Application List?', 'jobman' ) . '</td>';
 	$template .= '<td>';
 	if( count( $categories ) > 0 ) {
 		foreach( $categories as $cat ) {
-			$template .= "<input type='checkbox' name='jobman-categories' class='jobman-categories' value='$cat->term_id' />$cat->name<br/>";
+			$template .= '<input type="checkbox" name="jobman-categories" class="jobman-categories" value="' . $cat->term_id . '" />' . $cat->name . '<br/>';
 		}
 	}
 	$template .= '</td>';

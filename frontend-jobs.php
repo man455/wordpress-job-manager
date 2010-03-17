@@ -93,17 +93,6 @@ function jobman_display_jobs_list( $cat ) {
 		$content .= implode(', ', $links) . '<br>';
 	}
 	
-	$applyform = false;
-	$data = get_posts( 'post_type=jobman_app_form&numberposts=-1' );
-	if( count( $data ) > 0 ) {
-		$applyform = true;
-		$applypage = $data[0];
-	
-		$url = get_page_link( $applypage->ID );
-
-		$content .= "<form action='$url' method='post'>";
-	}
-	
 	if( count( $jobs ) > 0 ) {
 		if( 'sticky' == $options['highlighted_behaviour'] )
 			// Sort the sticky jobs to the top
@@ -142,12 +131,9 @@ function jobman_display_jobs_list( $cat ) {
 				else
 					$url .= '/' . $category->slug;
 			}
-			$content .= sprintf( __( "We currently don't have any jobs available in this area. Please check back regularly, as we frequently post new jobs. In the mean time, you can also <a href='%s'>send through your résuméa>, which we'll keep on file, and you can check out the <a href='%s'>jobs we have available in other areas</a>.", 'jobman' ), $url, get_page_link( $options['main_page'] ) );
+			$content .= sprintf( __( "We currently don't have any jobs available in this area. Please check back regularly, as we frequently post new jobs. In the mean time, you can also <a href='%s'>send through your résumé</a>, which we'll keep on file, and you can check out the <a href='%s'>jobs we have available in other areas</a>.", 'jobman' ), $url, get_page_link( $options['main_page'] ) );
 		}
 	}
-	
-	if( $applyform )
-		$content .= '</form>';
 
 	$page->post_content = $content;
 	

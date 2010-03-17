@@ -348,7 +348,7 @@ function jobman_edit_job( $jobid ) {
 
 					$content .= '<td>';
 					$content .= "<input type='file' name='jobman-field-$id' />";
-
+					
 					if( ! empty( $data ) ) {
 						$content .= '<br/><a href="' . wp_get_attachment_url( $data ) . '">' . wp_get_attachment_url( $data ) . '</a>';
 						$content .= "<input type='hidden' name='jobman-field-current-$id' value='$data' />";
@@ -576,13 +576,6 @@ function jobman_job_delete() {
 	$jobs = explode( ',', $_REQUEST['jobman-job-ids'] );
 	
 	foreach( $jobs as $job ) {
-		// Remove reference from applications
-		$apps = get_posts( 'post_type=jobman_app&numberposts=-1&meta_key=job&meta_value=' . $job->ID );
-		if( ! empty( $apps ) ) {
-			foreach( $apps as $app ) {
-				delete_post_meta( $app->ID, 'job', $job->ID );
-			}
-		}
 		// Delete the job
 		wp_delete_post( $job );
 	}
