@@ -9,7 +9,7 @@ Stable tag: trunk
 A job listing and job application management plugin for WordPress.
 
 == Description ==
-z
+
 A plugin for managing job lists and job applications on your WordPress site. It supports all the features you need to manage your organisation's job openings.
 
 Do you speak a language other than English? Do you have time to translate some strings? If so, I'd love to [hear from you](http://pento.net/contact/)!
@@ -42,10 +42,6 @@ Related links:
 
 == Installation ==
 
-Job Manager Requires:
-* WordPress 2.9 or later
-* PHP 5 or later
-
 = The Good Way =
 
 1. In your WordPress Admin, go to the Add New Plugins page
@@ -69,14 +65,6 @@ Job Manager Requires:
 
 For a full description of how to use the application form customization features, please read [this page in the documentation](http://code.google.com/p/wordpress-job-manager/wiki/CustomApplicationForm).
 
-= DOCX files don't download properly =
-
-Apache's `mod_mime_magic` doesn't recognise docx file type properly, and older versions of Apache don't have docx in their mime.types file. You should update your copy of Apache to something more recent, or (if you're unable to update or turn off `mod_mime_magic`) create a .htaccess file as [described here](http://www.webdeveloper.com/forum/showpost.php?p=898935&postcount=2).
-
-= I can't upload DOC files in WordPress MU =
-
-In your WordPress MU admin, go to Site Admin->Options. Update the "Upload File Types" option to include the various extensions (doc, docx, pdf, odt) that people are likely to upload their resume with.
-
 == Other Plugin Support ==
 
 The Job Manager supports added functionality when other plugins are installed. If you think your plugin could add some functionality to Job Manager, please [submit a feature request](http://code.google.com/p/wordpress-job-manager/issues/list).
@@ -97,33 +85,19 @@ Notice the version number in brackets. This is the version series that the trans
 
 * Dutch Translation (0.6.x), provided by [Patrick Tessels](http://www.centrologic.nl/) and [Henk van den Bor](http://webtaurus.nl/)
 * French Translation (0.6.x, frontend complete, admin 95% complete), provided by [Fabrice Fotso](http://www.procure-smart.com/) and Vincent Clady
+* German Translation (0.6.x), provided by [tolingo translations](http://www.tolingo.com/)
 
 = Special Thanks =
 
 * [EuroPlacements](http://europlacements.it/), for their input and support of the initial development of Job Manager.
-* [Automattic](http://automattic.com/), for their support and continued feedback on features, design and usability.
 * All the wonderful people who've submitted bugs, feedback and feature requests - you're the people who keep me with things to work on!
 
 Print Icon courtesy of [VisualPharm](http://www.visualpharm.com/), under a [CC BY-ND](http://creativecommons.org/licenses/by-nd/3.0/) license.
 
 == Changelog ==
 
-= 0.7 =
-* ADDED: Optional template for application form
-* ADDED: <select> type to application forms
-* ADDED: Ability to apply for multiple jobs at once
-* ADDED: Job selector in application form
-* ADDED: Geolocation field to application form
-* ADDED: Ability to search applications by distance from a given location
-* ADDED: WordPress.com support
-* ADDED: Category template option
-* ADDED: Option to show job fields in admin job list
-* ADDED: Interview scheduling
-* CHANGED: Removed user dropdown from Application filter, replaced with a text box. It required a bad query, so had to go.
-* FIXED: Some PHP warnings
-* FIXED: HTML errors in Admin
-* FIXED: Admin menu now uses handles rather than file references
-* FIXED: Some strings not going through the translation functions
+= 0.6.5 =
+* ADDED: German translation, provided by [tolingo translations](http://www.tolingo.com/)
 
 = 0.6.4 =
 * ADDED: Support for category templates, as category-{foo}.php

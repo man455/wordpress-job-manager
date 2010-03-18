@@ -11,8 +11,8 @@ require_once( dirname( __FILE__ ) . '/frontend-rss.php' );
 // Shortcode magic
 require_once( dirname( __FILE__ ) . '/frontend-shortcodes.php' );
 
-global $jobman_displaying, $jobman_finishedpage, $jobman_geoloc;
-$jobman_finishedpage = $jobman_displaying = $jobman_geoloc = false;
+global $jobman_displaying, $jobman_finishedpage;
+$jobman_finishedpage = $jobman_displaying = false;
 
 function jobman_queryvars( $qvars ) {
 	$qvars[] = 'j';
@@ -101,7 +101,7 @@ function jobman_display_jobs( $posts ) {
 			return $posts;
 	}
 
-	// We're going to be displaying a Job Manager page.
+	// We're going to be displaying a Job Manager page. Un-fuck WordPress.
 	$jobman_displaying = true;
 	$wp_query->is_home = false;
 	remove_filter( 'the_content', 'wpautop' );
@@ -231,7 +231,6 @@ function jobman_display_jobs( $posts ) {
 
 function jobman_display_init() {
 	wp_enqueue_script( 'jquery-ui-datepicker', JOBMAN_URL . '/js/jquery-ui-datepicker.js', array( 'jquery-ui-core' ), JOBMAN_VERSION );
-	wp_enqueue_script( 'google-gears', JOBMAN_URL . '/js/gears_init.js', false, JOBMAN_VERSION );
 	wp_enqueue_script( 'jquery-display', JOBMAN_URL . '/js/display.js', false, JOBMAN_VERSION );
 	wp_enqueue_style( 'jobman-display', JOBMAN_URL . '/css/display.css', false, JOBMAN_VERSION );
 }
@@ -264,7 +263,7 @@ function jobman_display_template() {
 	if( $id )
 		$templates[] = "page-$id.php";
 	$templates[] = "page.php";
-
+	
 	$template = apply_filters( 'page_template', locate_template( $templates ) );
 
 	if( '' != $template ) {
@@ -309,7 +308,7 @@ function jobman_display_title( $title, $sep, $seploc ) {
 }
 
 function jobman_display_head() {
-	global $jobman_displaying, $jobman_geoloc;
+	global $jobman_displaying;
 	
 	if( ! $jobman_displaying )
 		return;
@@ -343,47 +342,6 @@ function jobman_display_head() {
 jQuery(document).ready(function() {
 	jQuery(".datepicker").datepicker({dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, gotoCurrent: true});
 	jQuery("#ui-datepicker-div").css('display', 'none');
-	
-	jQuery("#jobman-jobselect-echo").click(function( event ) {
-		if( jQuery(this).hasClass("open") ) {
-			jQuery(this).removeClass("open");
-		}
-		else {
-			jQuery(".jobselect-popout").css( "left", jQuery("#jobman-jobselect").position().left + "px" );
-			jQuery(".jobselect-popout").css( "top", ( jQuery("#jobman-jobselect").position().top + 20 ) + "px" );
-			jQuery(this).addClass("open");
-		}
-
-		jQuery(".jobselect-popout").animate({ opacity: 'toggle', height: 'toggle' }, "fast");
-		
-		event.preventDefault();
-	});
-	
-	jQuery("#jobman-jobselect-close a").click( function() { jQuery("#jobman-jobselect-echo").click(); return false; } );
-	
-	jQuery(".jobselect-popout input").click(function() {
-		jobman_update_selected_jobs();
-		return true;
-	});
-	
-	jobman_update_selected_jobs();
-
-<?php if( $jobman_geoloc ) { ?>
-	var geo;
-	if( navigator.geolocation ) {
-		// HTML5
-		geo = navigator.geolocation;
-		geo.getCurrentPosition( jobman_html5_geo_success );
-	}
-	else if( google.gears ) {
-		// Google Gears
-		geo = google.gears.factory.create('beta.geolocation');
-		geo.getCurrentPosition( jobman_gears_geo_success, 
-								jobman_gears_geo_error,
-								{ enableHighAccuracy: true,
-                                     gearsRequestAddress: true } );
-	}
-<?php } ?>
 });
 //]]>
 var jobman_mandatory_ids = <?php echo json_encode( $mandatory_ids ) ?>;
@@ -391,48 +349,6 @@ var jobman_mandatory_labels = <?php echo json_encode( $mandatory_labels ) ?>;
 
 var jobman_strings = new Array();
 jobman_strings['apply_submit_mandatory_warning'] = "<?php _e( 'The following fields must be filled out before submitting', 'jobman' ) ?>";
-jobman_strings['no_selected_jobs'] = "<?php _e( 'click to select', 'jobman' ) ?>";
-
-var jobman_selected_jobs_names;
-function jobman_update_selected_jobs() {
-	jobman_selected_jobs_names = new Array();
-
-	jQuery(".jobselect-popout").find("input:checked").each( function() {
-		jobman_selected_jobs_names.push( jQuery(this).attr( 'title' ) );
-	});
-	
-	var jobs;
-	if( jobman_selected_jobs_names.length ) {
-		jobs = jobman_selected_jobs_names.join( ", " );
-	}
-	else {
-		jobs = "&lt;" + jobman_strings['no_selected_jobs'] + "&gt;";
-	}
-	jQuery("#jobman-jobselect-echo").html( jobs );
-
-}
-
-<?php if( $jobman_geoloc ) { ?>
-function jobman_html5_geo_success( pos ) {
-	var description = pos.address.city + ", " + pos.address.region + ", " + pos.address.country;
-	jobman_geo_set_values( description, pos.coords.latitude, pos.coords.longitude );
-}
-
-function jobman_gears_geo_success( pos ) {
-	var description = pos.gearsAddress.city + ", " + pos.gearsAddress.region + ", " + pos.gearsAddress.country;
-	jobman_geo_set_values( description, pos.latitude, pos.longitude );
-}
-
-function jobman_gears_geo_error( err ) {
-	return;
-}
-
-function jobman_geo_set_values( description, latitude, longitude ) {
-	jQuery(".jobman-geoloc-data").val( latitude + "," + longitude );
-	jQuery(".jobman-geoloc-original-display").val( description );
-	jQuery(".jobman-geoloc-display").val( description );
-}
-<?php } ?>
 </script> 
 <?php
 }

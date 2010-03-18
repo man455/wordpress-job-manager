@@ -10,12 +10,10 @@ function jobman_application_setup() {
 	$fieldtypes = array(
 						'text' => __( 'Text Input', 'jobman' ),
 						'radio' => __( 'Radio Buttons', 'jobman' ),
-						'select' => __( 'Select Dropdown', 'jobman' ),
 						'checkbox' => __( 'Checkboxes', 'jobman' ),
 						'textarea' => __( 'Large Text Input (textarea)', 'jobman' ),
 						'date' => __( 'Date Selector', 'jobman' ),
 						'file' => __( 'File Upload', 'jobman' ),
-						'geoloc' => __( 'Geolocation', 'jobman' ),
 						'heading' => __( 'Heading', 'jobman' ),
 						'html' => __( 'HTML Code', 'jobman' ),
 						'blank' => __( 'Blank Space', 'jobman' )

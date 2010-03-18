@@ -1,9 +1,7 @@
 <?php 
 function jobman_list_jobs() {
-	$options = get_option( 'jobman_options' );
-	$fields = $options['job_fields'];
-	
 	$displayed = 1;
+
 	if( array_key_exists( 'jobman-mass-edit-jobs', $_REQUEST ) && 'delete' == $_REQUEST['jobman-mass-edit-jobs'] ) {
 		if( array_key_exists( 'jobman-delete-confirmed', $_REQUEST ) ) {
 			check_admin_referer( 'jobman-mass-delete-jobs' );
@@ -21,8 +19,8 @@ function jobman_list_jobs() {
 		if( 1 == $displayed )
 			return;
 	}
-	
-	
+
+
 ?>
 	<div class="wrap">
 		<h2><?php _e( 'Job Manager: Jobs List', 'jobman' ) ?></h2>
@@ -55,19 +53,6 @@ function jobman_list_jobs() {
 				<th scope="col" id="cb" class="column-cb check-column"><input type="checkbox"></th>
 				<th scope="col"><?php _e( 'Title', 'jobman' ) ?></th>
 				<th scope="col"><?php _e( 'Categories', 'jobman' ) ?></th>
-<?php
-	$fieldcount = 0;
-	if( count( $fields ) > 0 ) {
-		foreach( $fields as $field ) {
-			if( $field['listdisplay'] ) {
-			$fieldcount++;
-?>
-				<th scope="col"><?php echo $field['label'] ?></th>
-<?php
-			}
-		}
-	}
-?>
 				<th scope="col"><?php _e( 'Display Dates', 'jobman' ) ?></th>
 				<th scope="col"><?php _e( 'Applications', 'jobman' ) ?></th>
 			</tr>
@@ -78,10 +63,9 @@ function jobman_list_jobs() {
 		jobman_list_jobs_data( $expired, true );
 	}
 	else {
-		$fieldcount += 5;
 ?>
 			<tr>
-				<td colspan="<?php echo $fieldcount ?>"><?php _e( 'There are currently no jobs in the system.', 'jobman' ) ?></td>
+				<td colspan="5"><?php _e( 'There are currently no jobs in the system.', 'jobman' ) ?></td>
 			</tr>
 <?php
 	}
@@ -102,9 +86,6 @@ function jobman_list_jobs() {
 function jobman_list_jobs_data( $jobs, $showexpired = false ) {
 		if( ! is_array( $jobs ) || count( $jobs ) <= 0 )
 			return;
-			
-		$options = get_option( 'jobman_options' );
-		$fields = $options['job_fields'];
 
 		$expiredjobs = array();
 		foreach( $jobs as $job ) {
@@ -128,35 +109,17 @@ function jobman_list_jobs_data( $jobs, $showexpired = false ) {
 				continue;
 			}
 			
-			$children = get_posts( "post_type=jobman_app&meta_key=job&meta_value=$job->ID&post_status=publish,private" );
+			$children = get_posts( "post_type=jobman_app&post_parent=$job->ID" );
 			if( count( $children ) > 0 )
 				$applications = '<a href="' . admin_url("admin.php?page=jobman-list-applications&amp;jobman-jobid=$job->ID") . '">' . count( $children ) . '</a>';
 			else
-				$applications = 0;
+				$applications = count( $children );
 ?>
 			<tr>
 				<th scope="row" class="check-column"><input type="checkbox" name="job[]" value="<?php echo $job->ID ?>" /></th>
 				<td class="post-title page-title column-title"><strong><a href="?page=jobman-list-jobs&amp;jobman-jobid=<?php echo $job->ID ?>"><?php echo $job->post_title ?></a></strong>
 				<div class="row-actions"><a href="?page=jobman-list-jobs&amp;jobman-jobid=<?php echo $job->ID ?>"><?php _e( 'Edit', 'jobman' ) ?></a> | <a href="<?php echo get_page_link( $job->ID ) ?>"><?php _e( 'View', 'jobman' ) ?></a></div></td>
 				<td><?php echo $catstring ?></td>
-<?php
-			if( count( $fields ) ) {
-				foreach( $fields as $id => $field ) {
-					if( $field['listdisplay'] ) {
-						$data = get_post_meta( $job->ID, "data$id", true );
-						if( ! empty( $data ) ) {
-							if( 'file' == $field['type'] )
-								$data = '<a href="' . wp_get_attachment_url( $data ) . '">' . __( 'Download', 'jobman' ) . '</a>';
-							else if( is_array( $data ) )
-								$data = implode( ', ', $data );
-						}
-?>
-				<td><?php echo $data ?></td>
-<?php
-					}
-				}
-			}
-?>
 				<td><?php echo date( 'Y-m-d', strtotime( $job->post_date ) ) ?> - <?php echo ( '' == $displayenddate )?( __( 'End of Time', 'jobman' ) ):( $displayenddate ) ?><br/>
 				<?php echo ( $display )?( __( 'Live/Upcoming', 'jobman' ) ):( __( 'Expired', 'jobman' ) ) ?></td>
 				<td><?php echo $applications ?></td>
@@ -385,7 +348,7 @@ function jobman_edit_job( $jobid ) {
 
 					$content .= '<td>';
 					$content .= "<input type='file' name='jobman-field-$id' />";
-
+					
 					if( ! empty( $data ) ) {
 						$content .= '<br/><a href="' . wp_get_attachment_url( $data ) . '">' . wp_get_attachment_url( $data ) . '</a>';
 						$content .= "<input type='hidden' name='jobman-field-current-$id' value='$data' />";
@@ -613,13 +576,6 @@ function jobman_job_delete() {
 	$jobs = explode( ',', $_REQUEST['jobman-job-ids'] );
 	
 	foreach( $jobs as $job ) {
-		// Remove reference from applications
-		$apps = get_posts( 'post_type=jobman_app&numberposts=-1&meta_key=job&meta_value=' . $job->ID );
-		if( ! empty( $apps ) ) {
-			foreach( $apps as $app ) {
-				delete_post_meta( $app->ID, 'job', $job->ID );
-			}
-		}
 		// Delete the job
 		wp_delete_post( $job );
 	}
