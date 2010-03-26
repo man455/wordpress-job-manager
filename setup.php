@@ -37,11 +37,8 @@ function jobman_create_default_settings() {
 					'list_type' => 'full',
 					'application_email_from' => 4,
 					'application_email_from_fields' => array( 2, 3 ),
-					'application_email_subject_text' => __( 'Job Application', 'jobman' ) . ':',
+					'application_email_subject_text' => 'Job Application:',
 					'application_email_subject_fields' => array( 2, 3 ),
-					'interview_default_view' => 'month',
-					'interview_title_text' => '',
-					'interview_title_fields' => array( 2, 3 ),
 					'promo_link' => 0,
 					'user_registration' => 0,
 					'user_registration_required' => 0,
@@ -71,18 +68,13 @@ function jobman_create_default_settings() {
 								'job_title_prefix' => __( 'Job', 'jobman' ) . ': ',
 								'application_acceptance' => __( 'Thank you for your application! We\'ll check it out, and get back to you soon!', 'jobman' )
 							),
-					'templates' => array( 
-									'application_form' => ''
-								),
 					'plugins' => array(
 									'gxs' => 1,
 									'sicaptcha' => 0
-								),
-					'api_keys' => array(
-									'google_maps' => ''
 								)
 				);
 
+	$options['templates'] = array();
 	$options['templates']['job'] = <<<EOT
 <table class="job-table[if_job_highlighted] highlighted[/if_job_highlighted]">
   <tr>
@@ -312,17 +304,6 @@ EOT;
 </div><br/><br/>
 [/job_loop]
 EOT;
-		}
-		
-		if( $oldversion < 14 ) {
-			$options['templates']['application_form'] = '';
-			$options['multi_applications'] = 0;
-			$options['api_keys'] = array(
-										'google_maps' => ''
-									);
-			$options['interview_default_view'] = 'month';
-			$options['interview_title_text'] = '';
-			$options['interview_title_fields'] = array();
 		}
 		
 		update_option( 'jobman_options', $options );

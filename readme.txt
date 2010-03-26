@@ -12,8 +12,6 @@ A job listing and job application management plugin for WordPress.
 
 A plugin for managing job lists and job applications on your WordPress site. It supports all the features you need to manage your organisation's job openings.
 
-***WARNING:*** this is a **BETA** release of Job Manager, and it may contain bugs that will eat your data. **DO NOT** use it in a production environment. There will be a stable release of 0.7 in early April, please wait until then before upgrading production. If you have time to test it in your development environment, please do so, and (let me know any bugs you run into)[http://code.google.com/p/wordpress-job-manager/issues/list]. You can download the current stable release, version 0.6.5, here!
-
 Do you speak a language other than English? Do you have time to translate some strings? If so, I'd love to [hear from you](http://pento.net/contact/)!
 
 *    *Job Listing*
@@ -26,7 +24,7 @@ Do you speak a language other than English? Do you have time to translate some s
     *    Jobs can be defined to display between certain dates, or indefinitely
     *    Simple admin interface for editing, updating and creating jobs
 *    *Applications*
-    *    Applicants can apply through the website, using a form that you can customize and template, so you get the information you need
+    *    Applicants can apply through the website, using a form that you can customize, so you get the information you need
     *    Advanced filtering on application forms, to ensure you only get applications that match your criteria: [Documentation](http://code.google.com/p/wordpress-job-manager/wiki/CustomApplicationForm)
     *    Upon successful application, you can be emailed the details, so you're always up to date with new applicants
 *    *Applicant Management*
@@ -43,10 +41,6 @@ Related links:
 * [Translations](http://translations.pento.net/)
 
 == Installation ==
-
-Job Manager Requires:
-* WordPress 2.9 or later
-* PHP 5 or later
 
 = The Good Way =
 
@@ -70,14 +64,6 @@ Job Manager Requires:
 = How do I setup a custom application form? =
 
 For a full description of how to use the application form customization features, please read [this page in the documentation](http://code.google.com/p/wordpress-job-manager/wiki/CustomApplicationForm).
-
-= DOCX files don't download properly =
-
-Apache's `mod_mime_magic` doesn't recognise docx file type properly, and older versions of Apache don't have docx in their mime.types file. You should update your copy of Apache to something more recent, or (if you're unable to update or turn off `mod_mime_magic`) create a .htaccess file as [described here](http://www.webdeveloper.com/forum/showpost.php?p=898935&postcount=2).
-
-= I can't upload DOC files in WordPress MU =
-
-In your WordPress MU admin, go to Site Admin->Options. Update the "Upload File Types" option to include the various extensions (doc, docx, pdf, odt) that people are likely to upload their resume with.
 
 == Other Plugin Support ==
 
@@ -104,41 +90,18 @@ Notice the version number in brackets. This is the version series that the trans
 = Special Thanks =
 
 * [EuroPlacements](http://europlacements.it/), for their input and support of the initial development of Job Manager.
-* [Automattic](http://automattic.com/), for their support and continued feedback on features, design and usability.
 * All the wonderful people who've submitted bugs, feedback and feature requests - you're the people who keep me with things to work on!
 
 Print Icon courtesy of [VisualPharm](http://www.visualpharm.com/), under a [CC BY-ND](http://creativecommons.org/licenses/by-nd/3.0/) license.
 
 == Changelog ==
 
-= 0.7 =
-* ADDED: Optional template for application form
-* ADDED: <select> type to application forms
-* ADDED: Ability to apply for multiple jobs at once
-* ADDED: Job selector in application form
-* ADDED: Geolocation field to application form
-* ADDED: Ability to search applications by distance from a given location
-* ADDED: WordPress.com support
-* ADDED: Category template option
-* ADDED: Option to show job fields in admin job list
-* ADDED: Interview scheduling
-* ADDED: Job mass-edit option to archive/unarchive
-* ADDED: Ability to comment on interviews and applications
-* ADDED: Option to block application fields from being included in the application email
-* ADDED: Widget to show a custom list of selected jobs
-* CHANGED: Removed user dropdown from Application filter, replaced with a text box. It required a bad query, so had to go.
-* CHANGED: Separated admin jobs list by future/live/expired, so it's easier to read
-* CHANGED: Job list sorting now allows sorting by any job field
-* FIXED: Some PHP warnings
-* FIXED: HTML errors in Admin
-* FIXED: Admin menu now uses handles rather than file references
-* FIXED: Some strings not going through the translation functions
-* FIXED: Email form being printed with application details
-* FIXED: Renaming category titles not saving
-* FIXED: Categories not playing nicely with breadcrumb plugins
-* FIXED: Emails not working properly
-* FIXED: Some performance tweaks
-* FIXED: Some print CSS tweaks
+= 0.6.6 =
+* ADDED: Individual job pages will try to load category templates before default template
+* FIXED: Potential upload error when attaching a file to a job
+* FIXED: Applications/emails not displaying in fresh installations
+* FIXED: Job List breaking in WordPress 3
+* FIXED: Trimming whitespace from application form data fields
 
 = 0.6.5 =
 * ADDED: German translation, provided by [tolingo translations](http://www.tolingo.com/)
@@ -348,20 +311,20 @@ Print Icon courtesy of [VisualPharm](http://www.visualpharm.com/), under a [CC B
 
 == Upgrade Notice ==
 
-= 0.7-beta6 =
-This is a BETA release of Job Manager. DO NOT use it in a production environment.
+= 0.6-beta6 =
+This is a beta release of Job Manager. Please do not use it in a production environment.
 
-= 0.7-beta5 =
-This is a BETA release of Job Manager. DO NOT use it in a production environment.
+= 0.6-beta5 =
+This is a beta release of Job Manager. Please do not use it in a production environment.
 
-= 0.7-beta4 =
-This is a BETA release of Job Manager. DO NOT use it in a production environment.
+= 0.6-beta4 =
+This is a beta release of Job Manager. Please do not use it in a production environment.
 
-= 0.7-beta3 =
-This is a BETA release of Job Manager. DO NOT use it in a production environment.
+= 0.6-beta3 =
+This is a beta release of Job Manager. Please do not use it in a production environment.
 
-= 0.7-beta2 =
-This is a BETA release of Job Manager. DO NOT use it in a production environment.
+= 0.6-beta2 =
+This is a beta release of Job Manager. Please do not use it in a production environment.
 
-= 0.7-beta1 =
-This is a BETA release of Job Manager. DO NOT use it in a production environment.
+= 0.6-beta1 =
+This is a beta release of Job Manager. Please do not use it in a production environment.

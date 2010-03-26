@@ -789,25 +789,6 @@ function jobman_upgrade_db( $oldversion ) {
 		}
 	}
 	
-	if( $oldversion < 15 ) {
-		// Store the job being applied for as metadata
-		$apps = get_posts( 'post_type=jobman_app&numberposts=-1&post_status=publish,private' );
-		foreach( $apps as $app ) {
-			$app = get_post( $app->ID );
-				
-			$parent = get_post( $app->post_parent );
-			if( empty( $parent ) || 'jobman_job' != $parent->post_type )
-				continue;
-				
-			add_post_meta( $app->ID, 'job', $parent->ID, false );
-		}
-		
-		// Add the 'email block' field option
-		foreach( $options['fields'] as $id => $field ) {
-			$options['fields'][$id]['emailblock'] = 0;
-		}
-	}
-	
 	update_option( 'jobman_options', $options );
 }
 

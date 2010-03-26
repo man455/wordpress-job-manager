@@ -30,7 +30,7 @@ function jobman_list_emails() {
 <?php
 	$args = array();
 	$args['post_type'] = 'jobman_email';
-	$args['post_status'] = 'private,publish';
+	$args['post_status'] = array( 'private', 'publish' );
 	$args['offset'] = 0;
 	$args['numberposts'] = -1;
 
@@ -97,7 +97,7 @@ function jobman_email_display( $emailid ) {
 		        <td><?php echo $email->post_title ?></td>
 		    </tr>
 <?php
-    $apps = get_posts( "post_type=jobman_app&meta_key=contactmail&meta_value=$email->ID&numberposts=-1&post_status=public,private" );
+    $apps = get_posts( "post_type=jobman_app&meta_key=contactmail&meta_value=$email->ID&numberposts=-1&post_status=publish,private" );
 
 	$appstrings = array();
 	$emails = array();
@@ -145,12 +145,16 @@ function jobman_application_mailout() {
 	$emails = array();
 	$appids = array();
 	foreach( $apps as $app ) {
-		$email = get_post_meta( $app, "data$fromid", true );
-		if( empty( $email ) )
+		$appmeta = get_post_custom( $app->ID );
+		if( ! array_key_exists("data$fromid", $appmeta ) || '' == $appmeta["data$fromid"] )
 			// No email for this application
 			continue;
 
-		$emails[] = $email;
+		if( is_array( $appmeta["data$fromid"] ) )
+			$emails[] = $appmeta["data$fromid"][0];
+		else
+			$emails[] = $appmeta["data$fromid"];
+			
 		$appids[] = $app->ID;
 	}
 	$email_str = implode( ', ', array_unique( $emails ) );

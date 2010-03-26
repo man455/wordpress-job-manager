@@ -12,14 +12,6 @@ function jobman_display_conf() {
 		check_admin_referer( 'jobman-template-updatedb' );
 		jobman_template_updatedb();
 	}
-	else if( array_key_exists( 'jobmanappformsubmit', $_REQUEST ) ) {
-		check_admin_referer( 'jobman-appform-updatedb' );
-		jobman_appform_updatedb();
-	}
-	else if( array_key_exists( 'jobmanapptemplatesubmit', $_REQUEST ) ) {
-		check_admin_referer( 'jobman-app-template-updatedb' );
-		jobman_app_template_updatedb();
-	}
 	else if( array_key_exists( 'jobmanwraptextsubmit', $_REQUEST ) ) {
 		check_admin_referer( 'jobman-wraptext-updatedb' );
 		jobman_wrap_text_updatedb();
@@ -35,11 +27,11 @@ function jobman_display_conf() {
 	if( ! get_option( 'pento_consulting' ) ) {
 		$widths = array( '78%', '20%' );
 		$functions = array(
-						array( 'jobman_print_display_settings_box', 'jobman_print_sort_box', 'jobman_print_template_box', 'jobman_print_app_settings_box', 'jobman_print_app_template_box', 'jobman_print_misc_text_box', 'jobman_print_wrap_text_box' ),
+						array( 'jobman_print_display_settings_box', 'jobman_print_sort_box', 'jobman_print_template_box', 'jobman_print_misc_text_box', 'jobman_print_wrap_text_box' ),
 						array( 'jobman_print_donate_box', 'jobman_print_about_box' )
 					);
 		$titles = array(
-					array( __( 'Display Settings', 'jobman' ), __( 'Job List Sorting', 'jobman' ), __( 'Job Templates', 'jobman' ), __( 'Application Form Settings', 'jobman' ), __( 'Application Form Template', 'jobman' ), __( 'Miscellaneous Text', 'jobman' ), __( 'Page Text', 'jobman' ) ),
+					array( __( 'Display Settings', 'jobman' ), __( 'Job List Sorting', 'jobman' ), __( 'Job Templates', 'jobman' ), __( 'Miscellaneous Text', 'jobman' ), __( 'Page Text', 'jobman' ) ),
 					array( __( 'Donate', 'jobman' ), __( 'About This Plugin', 'jobman' ))
 				);
 	}
@@ -47,11 +39,11 @@ function jobman_display_conf() {
 		$widths = array( '49%', '49%' );
 		$functions = array(
 						array( 'jobman_print_display_settings_box', 'jobman_print_misc_text_box', 'jobman_print_wrap_text_box' ),
-						array( 'jobman_print_sort_box', 'jobman_print_template_box', 'jobman_print_app_settings_box', 'jobman_print_app_template_box' )
+						array( 'jobman_print_sort_box', 'jobman_print_template_box' )
 					);
 		$titles = array(
 					array( __( 'Display Settings', 'jobman' ), __( 'Miscellaneous Text', 'jobman' ), __( 'Page Text', 'jobman' ) ),
-					array( __( 'Job List Sorting', 'jobman' ), __( 'Job Templates', 'jobman' ), __( 'Application Form Settings', 'jobman' ), __( 'Application Form Template', 'jobman' ) )
+					array( __( 'Job List Sorting', 'jobman' ), __( 'Job Templates', 'jobman' ) )
 				);
 	}
 	jobman_create_dashboard( $widths, $functions, $titles );
@@ -90,7 +82,7 @@ function jobman_print_display_settings_box() {
 
 function jobman_print_sort_box() {
 	$options = get_option( 'jobman_options' );
-?>
+	?>
 		<form action="" method="post">
 		<input type="hidden" name="jobmansortsubmit" value="1" />
 <?php 
@@ -104,15 +96,6 @@ function jobman_print_sort_box() {
 					<option value="title"<?php echo ( 'title' == $options['sort_by'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'Job Title', 'jobman' ) ?></option>
 					<option value="dateposted"<?php echo ( 'dateposted' == $options['sort_by'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'Date Posted', 'jobman' ) ?></option>
 					<option value="closingdate"<?php echo ( 'closingdate' == $options['sort_by'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'Closing Date', 'jobman' ) ?></option>
-<?php
-	$fields = $options['job_fields'];
-	uasort( $fields, 'jobman_sort_fields' );
-	foreach( $fields as $fid => $field ) {
-?>
-					<option value="data<?php echo $fid ?>"<?php echo ( "data$fid" == $options['sort_by'] )?( ' selected="selected"' ):( '' ) ?>><?php printf( __( 'Custom Field: %1s', 'jobman' ), $field['label'] ) ?></option>
-<?php
-	}
-?>
 				</select></td>
 				<td><span class="description"><?php _e( "Select the criteria you'd like to have job lists sorted by.", 'jobman' ) ?></span></td>
 			</tr>
@@ -185,12 +168,7 @@ function jobman_print_template_box() {
 			<code>[if_job_categories]<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;<?php _e( 'Categories', 'jobman' ) ?>: [job_categories]<br/>
 [/if_job_categories]
-			</code><br/><br/>
-			
-			<strong><?php _e( 'Multi-Applications', 'jobman' ) ?></strong><br/>
-			<?php _e( 'These shortcodes are only valid if the "Allow Multi-Applications" option is checked under Admin Options. If it is not checked, they will not display.', 'jobman' ) ?><br/>
-			<tt>[job_checkbox]</tt> - <?php _e( 'While inside a <tt>[job_field_loop]</tt>, this will display a checkbox associated with the current job.', 'jobman' ) ?><br/>
-			<tt>[job_apply_multi]...[/job_apply_multi]</tt> - <?php _e( 'This will display a button to allow the applicant to apply for all checked jobs, with the contained text as the button text.', 'jobman' ) ?>
+			</code>
 		</p>
 		<form action="" method="post">
 		<input type="hidden" name="jobmantemplatesubmit" value="1" />
@@ -207,103 +185,6 @@ function jobman_print_template_box() {
 				<td><textarea name="job" class="large-text code" rows="7"><?php echo $options['templates']['job'] ?></textarea></td>
 			</tr>
 		</table>
-		<p class="submit"><input type="submit" name="submit"  class="button-primary" value="<?php _e( 'Update Template Settings', 'jobman' ) ?>" /></p>
-		</form>
-<?php
-}
-
-function jobman_print_app_settings_box() {
-	$options = get_option( 'jobman_options' );
-?>
-		<form action="" method="post">
-		<input type="hidden" name="jobmanappformsubmit" value="1" />
-<?php 
-	wp_nonce_field( 'jobman-appform-updatedb' ); 
-?>
-		<table class="form-table">
-			<tr>
-				<th scope="row"><?php _e( 'Category Selector', 'jobman' ) ?></th>
-				<td><select name="app-cat-select">
-					<option value=""<?php echo ( '' == $options['app_cat_select'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( "Don't Display", 'jobman' ) ?></option>
-					<option value="select"<?php echo ( 'select' == $options['app_cat_select'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'Dropdown', 'jobman' ) ?></option>
-					<option value="individual"<?php echo ( 'individual' == $options['app_cat_select'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'HTML List', 'jobman' ) ?></option>
-					<option value="popout"<?php echo ( 'popout' == $options['app_cat_select'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'Popout', 'jobman' ) ?></option>
-				</select></td>
-				<td><span class="description">
-					<?php _e( 'Allows an applicant to select a category or multiple categories to apply for. This will only display if the applicant is not applying for a specific job.', 'jobman' ) ?><br/>
-					<?php _e( 'Dropdown: Shows a normal selector', 'jobman' ) ?><br/>
-					<?php _e( 'HTML List: Shows a list of checkboxes', 'jobman' ) ?><br/>
-					<?php _e( 'Popout: Shows a list of checkboxes when the list is clicked on', 'jobman' ) ?><br/>
-				</span></td>
-			</tr>
-			<tr>
-				<th scope="row"><?php _e( 'Job Selector', 'jobman' ) ?></th>
-				<td><select name="app-job-select">
-					<option value=""<?php echo ( '' == $options['app_job_select'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( "Don't Display", 'jobman' ) ?></option>
-					<option value="select"<?php echo ( 'select' == $options['app_job_select'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'Dropdown', 'jobman' ) ?></option>
-					<option value="individual"<?php echo ( 'individual' == $options['app_job_select'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'HTML List', 'jobman' ) ?></option>
-					<option value="popout"<?php echo ( 'popout' == $options['app_job_select'] )?( ' selected="selected"' ):( '' ) ?>><?php _e( 'Popout', 'jobman' ) ?></option>
-				</select></td>
-				<td><span class="description">
-					<?php _e( 'Allows an applicant to select a category or multiple categories to apply for. This will only display if the applicant is not applying for a specific job. On category application forms, it will only list jobs from that category.', 'jobman' ) ?><br/>
-					<?php _e( 'Dropdown: Shows a normal selector', 'jobman' ) ?><br/>
-					<?php _e( 'HTML List: Shows a list of radio buttons or checkboxes', 'jobman' ) ?><br/>
-					<?php _e( 'Popout: Shows a list of radio buttons or checkboxes when the list is clicked on', 'jobman' ) ?><br/>
-				</span></td>
-			</tr>
-		</table>
-		
-		<p class="submit"><input type="submit" name="submit"  class="button-primary" value="<?php _e( 'Update Application Form Options', 'jobman' ) ?>" /></p>
-		</form>
-<?php
-}
-
-function jobman_print_app_template_box() {
-	$options = get_option( 'jobman_options' );
-?>
-		<p><?php _e( "This setting allows you to define the template for displaying the application form. If you're happy with the current application form, just leave this blank, as you'll need to update it each time you add a new field to the application form.", 'jobman' ) ?></p>
-		<p><?php _e( 'If you do want to do this, you will need to make use of the available shortcodes.', 'jobman' ) ?></p>
-		<p>
-			<strong><?php _e( 'Application Form', 'jobman' ) ?></strong><br/>
-			<tt>[job_links]</tt> - <?php _e( 'Display a list of links to the jobs being applied for.', 'jobman' ) ?><br/>
-			<tt>[job_list]</tt> - <?php _e( 'This will display a list of jobs to select from. If a category application form is being used, it will display all the jobs in that category. Otherwise, it will display all jobs. It has one optional attribute:', 'jobman' ) ?><br/>
-			<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type</tt> - <?php _e( 'Can be set to one of: "select", "individual" or "popout". "select" will show a dropdown box, "individual" will show a list with radio buttons or checkboxes, "popout" is the same as "individual", but only shows the list when it is clicked on.', 'jobman' ) ?><br/>
-			<tt>[cat_list]</tt> - <?php _e( 'This will display a list of categories to select from. It has one optional attribute:', 'jobman' ) ?><br/>
-			<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type</tt> - <?php _e( 'Can be set to one of: "select", "individual" or "popout". "select" will show a dropdown box, "individual" will show a list with checkboxes, "popout" is the same as "individual", but only shows the list when it is clicked on.', 'jobman' ) ?><br/>
-			<tt>[job_app_submit]...[/job_app_submit]</tt> - <?php _e( 'Display a submit button for the application form, with the contained text as the button text.', 'jobman' ) ?><br/><br/>
-			
-			<strong><?php _e( 'Custom Application Field Information', 'jobman' ) ?></strong><br/>
-			<?php _e( "For each of the Custom Job Fields defined, there are several shortcodes defined. Note that the numbers ('n' in the samples) won't change, even if you re-order, add or delete Application Fields.", 'jobman' ) ?><br/><br/>
-			<tt>[job_app_field<em>n</em>_label]</tt> - <?php _e( 'Display the field label', 'jobman' ) ?><br/>
-			<tt>[job_app_field<em>n</em>]</tt> - <?php _e( 'Display the field input element. ', 'jobman' ) ?><br/>
-			<tt>[job_app_field<em>n</em>_mandatory]</tt> - <?php _e( 'If the field has been marked as mandatory, this will display the word "mandatory".', 'jobman' ) ?><br/><br/>
-			
-			<strong><?php _e( 'Custom Application Fields', 'jobman' ) ?></strong><br/>
-<?php
-	foreach( $options['fields'] as $fid => $field ) {
-		$fieldlabel = '';
-		if( ! empty( $field['label'] ) )
-			$fieldlabel = $field['label'];
-		elseif( ! empty( $field['data'] ) )
-			$fieldlabel = $field['data'];
-		else
-			$fieldlabel = '(' . __( 'No Label', 'jobman' ) . ')';
-		
-		echo "<tt>[job_app_field{$fid}_label], [job_app_field{$fid}], [job_app_field{$fid}_mandatory]</tt> - $fieldlabel ({$field['type']})<br/>";
-	}
-?>
-			<br/>
-			
-			<strong><?php _e( 'Conditionals', 'jobman' ) ?></strong><br/>
-			<?php _e( 'All of the shortcodes defined above can be prefixed with <tt>if_</tt> to turn them into a conditional statement. For example, if you wanted to display an asterisk "*" next to the label of a mandatory field, you could put in the template:', 'jobman' ) ?><br/><br/>
-			<code>[job_app_field1_label] [if_job_app_field1_mandatory]*[/if_job_app_field1_mandatory]</code>
-		</p>
-		<form action="" method="post">
-		<input type="hidden" name="jobmanapptemplatesubmit" value="1" />
-<?php 
-	wp_nonce_field( 'jobman-app-template-updatedb' ); 
-?>
-		<textarea name="application-form" class="large-text code" rows="7"><?php echo $options['templates']['application_form'] ?></textarea>
 		<p class="submit"><input type="submit" name="submit"  class="button-primary" value="<?php _e( 'Update Template Settings', 'jobman' ) ?>" /></p>
 		</form>
 <?php
@@ -402,23 +283,6 @@ function jobman_template_updatedb() {
 	
 	$options['templates']['job_list'] = stripslashes( $_REQUEST['job-list'] );
 	$options['templates']['job'] = stripslashes( $_REQUEST['job'] );
-
-	update_option( 'jobman_options', $options );
-}
-
-function jobman_appform_updatedb() {
-	$options = get_option( 'jobman_options' );
-	
-	$options['app_cat_select'] = $_REQUEST['app-cat-select'];
-	$options['app_job_select'] = $_REQUEST['app-job-select'];
-
-	update_option( 'jobman_options', $options );
-}
-
-function jobman_app_template_updatedb() {
-	$options = get_option( 'jobman_options' );
-	
-	$options['templates']['application_form'] = stripslashes( $_REQUEST['application-form'] );
 
 	update_option( 'jobman_options', $options );
 }

@@ -110,29 +110,3 @@ p.jobmanpromo {
 	padding-top: 20px;
 	clear: left;
 }
-
-#jobman-jobselect-echo, #jobman-catselect-echo {
-	cursor: pointer;
-	border: 1px solid #ccc;
-	padding: 1px;
-}
-
-#jobman-jobselect-close a, #jobman-catselect-close a {
-	font-family: Helvetica, Arial, sans-serif;
-	font-size: 10px;
-	float: right;
-	margin-top: -10px;
-}
-
-span.jobselect-popout, span.catselect-popout {
-	position: absolute;
-	display: block;
-	background-color: #f1f1f1;
-	border: 1px solid #7d7e88;
-	padding: 10px 5px 5px;
-}
-
-span.jobselect-popout span, span.catselect-popout span {
-	display: block;
-	min-width: 150px;
-}
