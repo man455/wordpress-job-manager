@@ -12,8 +12,6 @@ A job listing and job application management plugin for WordPress.
 
 A plugin for managing job lists and job applications on your WordPress site. It supports all the features you need to manage your organisation's job openings.
 
-***WARNING:*** this is a **BETA** release of Job Manager, and it may contain bugs that will eat your data. **DO NOT** use it in a production environment. There will be a stable release of 0.7 in mid April, please wait until then before upgrading production. If you have time to test it in your development environment, please do so, and [let me know any bugs you run into](http://code.google.com/p/wordpress-job-manager/issues/list). You can download the current stable release, [version 0.6.6, here](http://wordpress.org/extend/plugins/job-manager/download/)!
-
 Do you speak a language other than English? Do you have time to translate some strings? If so, I'd love to [hear from you](http://pento.net/contact/)!
 
 *    *Job Listing*
@@ -112,16 +110,36 @@ Notice the version number in brackets. This is the version series that the trans
 = Special Thanks =
 
 * [EuroPlacements](http://europlacements.it/), for their input and support of the initial development of Job Manager.
-* [Automattic](http://automattic.com/), for their support and continued feedback on features, design and usability.
+* [Automattic](http://automattic.com/), for their support and feedback on features, design and usability.
 * All the wonderful people who've submitted bugs, feedback and feature requests - you're the people who keep me with things to work on!
 
 Print Icon courtesy of [VisualPharm](http://www.visualpharm.com/), under a [CC BY-ND](http://creativecommons.org/licenses/by-nd/3.0/) license.
 
 == Changelog ==
 
+= 0.7.1 =
+* ADDED: 'category-foo-job.php' template, which overrides 'category-foo.php' when viewing a job in the category 'foo'
+* ADDED: ref attribute to [job_apply_link] shortcode
+* ADDED: Link to individually archive/unarchive jobs
+* ADDED: Reverse GeoLoc lookup for browsers that don't do it be default
+* ADDED: Gravatar support in applications
+* CHANGED: Job editor now uses TinyMCE for editing textareas
+* CHANGED: Applications filter box now displays quicker
+* CHANGED: Settings now on one page, with tabs
+* CHANGED: Tweaked applications list layout
+* FIXED: Job multi-select popout now has `<label>` tags
+* FIXED: JavaScript error with Geoloc code in Chrome Dev Channel
+* FIXED: RSS feed showing wrong publication dates
+* FIXED: Authors could edit jobs created by other Authors
+* FIXED: Using ASCII instead of &larr; on Application Details page
+* FIXED: Application filter not working on un-rated applications
+* FIXED: Forgot password link not working under some circumstances
+* FIXED: Future jobs not displaying in admin job list
+* FIXED: Unable to unarchive future jobs
+
 = 0.7 =
 * ADDED: Optional template for application form
-* ADDED: <select> type to application forms
+* ADDED: `<select>` type to application forms
 * ADDED: Ability to apply for multiple jobs at once
 * ADDED: Job selector in application form
 * ADDED: Geolocation field to application form
