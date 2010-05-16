@@ -134,6 +134,7 @@ function jobman_display_apply( $jobid, $cat = NULL ) {
 	}
 	
 	$content .= '</form>';
+	$content .= '<div id="jobman-map" style="width: 1px; height: 1px; display: none;"></div>';
 
 	$page->post_content = $content;
 		
@@ -332,7 +333,9 @@ function jobman_generate_job_select( $cat, $type = 'select' ) {
 				$checked = '';
 				if( array_key_exists( 'jobman-joblist', $_REQUEST ) && in_array( $job->ID, $_REQUEST['jobman-joblist'] ) )
 					$checked = ' checked="checked"';
-				$content .= "<span><input type='$inputtype' name='jobman-jobselect$inputarray' title='$job->post_title' value='$job->ID'$checked /> $job->post_title</span>";
+				if( array_key_exists( 'jobman-jobid', $_REQUEST ) && $job->ID == $_REQUEST['jobman-jobid'] )
+					$checked = ' checked="checked"';
+				$content .= "<span><label><input type='$inputtype' name='jobman-jobselect$inputarray' title='$job->post_title' value='$job->ID'$checked /> $job->post_title</label></span>";
 			}
 			$content .= '</span>';
 			break;
@@ -343,6 +346,8 @@ function jobman_generate_job_select( $cat, $type = 'select' ) {
 			foreach( $jobs as $job ) {
 				$selected = '';
 				if( array_key_exists( 'jobman-joblist', $_REQUEST ) && in_array( $job->ID, $_REQUEST['jobman-joblist'] ) )
+					$selected = ' selected="selected"';
+				if( array_key_exists( 'jobman-jobid', $_REQUEST ) && $job->ID == $_REQUEST['jobman-jobid'] )
 					$selected = ' selected="selected"';
 				$content .= "<option value='$job->ID'$selected>$job->post_title</option>";
 			}
@@ -785,8 +790,17 @@ function jobman_email_application( $appid, $sendto = '' ) {
 	
 	$parent = get_post( $app->ancestors[0] );
 	$job_email = '';
-	if( 'jobman_job' == $parent->post_type )
-		$job_email = get_post_meta( $parent->ID, 'email', true );
+
+	$jobs = get_post_meta( $app->ID, 'job', false );
+	if( ! empty( $jobs ) ) {
+		$job_emails = array();
+		foreach( $jobs as $job ) {
+			$je = get_post_meta( $job, 'email', true );
+			if( ! empty( $je ) && ! in_array( $je, $job_emails ) )
+				$job_emails[] = $je;
+		}
+		$job_email = implode( ',', $job_emails );
+	}
 
 	$appmeta = get_post_custom( $appid );
 
@@ -814,10 +828,11 @@ function jobman_email_application( $appid, $sendto = '' ) {
 			if( $ii < count( $categories ) )
 				$to .= ', ';
 		}
-	} else {
-		$to = $options['default_email'];
 	}
 	
+	if( '' == $to )
+		$to = $options['default_email'];
+
 	if( '' == $to )
 		return;
 	
