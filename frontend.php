@@ -1,15 +1,15 @@
 <?php //encoding: utf-8
 
 // Job lists and individual jobs
-require_once( dirname( __FILE__ ) . '/frontend-jobs.php' );
+require_once( JOBMAN_DIR . '/frontend-jobs.php' );
 // Application form, application filtering and storage
-require_once( dirname( __FILE__ ) . '/frontend-application.php' );
+require_once( JOBMAN_DIR . '/frontend-application.php' );
 // User registration and login
-require_once( dirname( __FILE__ ) . '/frontend-user.php' );
+require_once( JOBMAN_DIR . '/frontend-user.php' );
 // RSS Feeds
-require_once( dirname( __FILE__ ) . '/frontend-rss.php' );
+require_once( JOBMAN_DIR . '/frontend-rss.php' );
 // Shortcode magic
-require_once( dirname( __FILE__ ) . '/frontend-shortcodes.php' );
+require_once( JOBMAN_DIR . '/frontend-shortcodes.php' );
 
 global $jobman_displaying, $jobman_finishedpage, $jobman_geoloc;
 $jobman_finishedpage = $jobman_displaying = $jobman_geoloc = false;
@@ -281,9 +281,20 @@ function jobman_display_jobs( $posts ) {
 }
 
 function jobman_display_init() {
+	$options = get_option( 'jobman_options' );
+	
+	if( defined( 'WP_ADMIN' ) && WP_ADMIN )
+		return;
+	
 	wp_enqueue_script( 'jquery-ui-datepicker', JOBMAN_URL . '/js/jquery-ui-datepicker.js', array( 'jquery-ui-core' ), JOBMAN_VERSION );
 	wp_enqueue_script( 'google-gears', JOBMAN_URL . '/js/gears_init.js', false, JOBMAN_VERSION );
 	wp_enqueue_script( 'jquery-display', JOBMAN_URL . '/js/display.js', false, JOBMAN_VERSION );
+	
+	if( !empty( $options['api_keys']['google_maps'] ) ) {
+		wp_enqueue_script( 'google-maps', "http://maps.google.com/maps?file=api&v=2&key={$options['api_keys']['google_maps']}", false, JOBMAN_VERSION );
+		wp_enqueue_script( 'greverse-geocoder', JOBMAN_URL . '/js/greversegeocoder.js', false, JOBMAN_VERSION );
+	}
+	
 	wp_enqueue_style( 'jobman-display', JOBMAN_URL . '/css/display.css', false, JOBMAN_VERSION );
 }
 
@@ -294,8 +305,6 @@ function jobman_display_template() {
 	if( ! $jobman_displaying )
 		return;
 	
-	// Code gleefully copied from wp-includes/theme.php
-
 	$root = get_page( $options['main_page'] );
 	$id = $root->ID;
 	$template = get_post_meta( $id, '_wp_page_template', true );
@@ -328,6 +337,8 @@ function jobman_display_template() {
 		$templates[] = "category-$category.php";
 	if( ! empty( $job_cats ) ) {
 		foreach( $job_cats as $jcat ) {
+		if( ! empty( $post ) && 'jobman_job' == $post->post_type )
+			$templates[] = "category-$jcat-job.php";
 			$templates[] = "category-$jcat.php";
 		}
 	}
@@ -348,40 +359,6 @@ function jobman_display_template() {
 		// The exit tells WP to not try to load any more templates
 		exit;
 	}
-}
-
-function jobman_display_title( $title, $sep, $seploc ) {
-	global $jobman_displaying, $wp_query;
-
-	if( ! $jobman_displaying )
-		return $title;
-
-	$post = $wp_query->post;
-	
-	switch( $post->post_type ) {
-		case 'jobman_job':
-			$newtitle = $post->post_title;
-			break;
-		case 'jobman_app_form':
-			$newtitle = __( 'Job Application', 'jobman' );
-			break;
-		case 'jobman_joblist':
-			$newtitle = __( 'Job Listing', 'jobman' ) . ': ' . $post->post_title;
-			break;
-		default:
-			$newtitle = __( 'Job Listing', 'jobman' );
-			break;
-	}
-	
-	if( '' == $newtitle )
-		return $title;
-
-	if( 'right' == $seploc )
-		$title = "$newtitle $sep ";
-	else
-		$title = " $sep $newtitle";
-	
-	return $title;
 }
 
 function jobman_display_head() {
@@ -472,13 +449,13 @@ jQuery(document).ready(function() {
 	if( navigator.geolocation ) {
 		// HTML5
 		geo = navigator.geolocation;
-		geo.getCurrentPosition( jobman_html5_geo_success );
+		geo.getCurrentPosition( jobman_geo_success );
 	}
 	else if( google.gears ) {
 		// Google Gears
 		geo = google.gears.factory.create('beta.geolocation');
-		geo.getCurrentPosition( jobman_gears_geo_success, 
-								jobman_gears_geo_error,
+		geo.getCurrentPosition( jobman_geo_success, 
+								jobman_geo_error,
 								{ enableHighAccuracy: true,
                                      gearsRequestAddress: true } );
 	}
@@ -532,25 +509,50 @@ function jobman_update_selected_cats() {
 }
 
 <?php if( $jobman_geoloc ) { ?>
-function jobman_html5_geo_success( pos ) {
-	var description = pos.address.city + ", " + pos.address.region + ", " + pos.address.country;
-	jobman_geo_set_values( description, pos.coords.latitude, pos.coords.longitude );
-}
+function jobman_geo_success( pos ) {
+	var description = "";
+	if( pos.address ) {
+		description = pos.address.city + ", " + pos.address.region + ", " + pos.address.country;
+	}
+	else if( pos.gearsAddress ) {
+		description = pos.gearsAddress.city + ", " + pos.gearsAddress.region + ", " + pos.gearsAddress.country;
+	}
+<?php	if( !empty( $options['api_keys']['google_maps'] ) ) { ?>
+	else {
+		var map = new GMap2( document.getElementById( "jobman-map" ) );
+		map.setCenter( new GLatLng( 51.05226693177032, 3.723893165588379 ), 15 );
+		var reversegeocoder = new GReverseGeocoder( map );
 
-function jobman_gears_geo_success( pos ) {
-	var description = pos.gearsAddress.city + ", " + pos.gearsAddress.region + ", " + pos.gearsAddress.country;
-	jobman_geo_set_values( description, pos.latitude, pos.longitude );
-}
+		GEvent.addListener(reversegeocoder, "load",
+			function( placemark ) {
+				description = placemark.AddressDetails.Country.CountryName;
+				if( placemark.AddressDetails.Country.AdministrativeArea ) {
+					description = placemark.AddressDetails.Country.AdministrativeArea.AdministrativeAreaName + ', ' + description;
+				}
+				if( placemark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea ) {
+					description = placemark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.SubAdministrativeAreaName + ', ' + description;
+				}
+				if( placemark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality ) {
+					description = placemark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.LocalityName + ', ' + description;
+				}
+				jQuery(".jobman-geoloc-original-display").val( description );
+				jQuery(".jobman-geoloc-display").val( description );
+			}
+		);
 
-function jobman_gears_geo_error( err ) {
-	return;
-}
-
-function jobman_geo_set_values( description, latitude, longitude ) {
-	jQuery(".jobman-geoloc-data").val( latitude + "," + longitude );
+		reversegeocoder.reverseGeocode( new GLatLng( pos.coords.latitude, pos.coords.longitude ) );
+	}
+<?php	} ?>
+	
+	jQuery(".jobman-geoloc-data").val( pos.coords.latitude + "," + pos.coords.longitude );
 	jQuery(".jobman-geoloc-original-display").val( description );
 	jQuery(".jobman-geoloc-display").val( description );
 }
+
+function jobman_geo_error( err ) {
+	return;
+}
+
 <?php } ?>
 //]]>
 </script> 
