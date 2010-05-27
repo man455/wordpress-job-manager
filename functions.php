@@ -94,7 +94,7 @@ function jobman_page_taxonomy_setup() {
 	
 	$root = get_page( $options['main_page'] );
 	$url = get_page_uri( $root->ID );
-
+	
 	register_taxonomy( 'jobman_category', array( 'jobman_job', 'jobman_app' ), array( 'hierarchical' => false, 'label' => __( 'Category', 'series' ), 'query_var' => 'jcat', 'rewrite' => array( 'slug' => $url ) ) );
 }
 
@@ -118,14 +118,14 @@ function jobman_current_url() {
 		$pageURL = 'http';
 		
 		if( is_ssl() )
-			$pageURL .= "s";
+			$pageURL .= 's';
 		
-		$pageURL .= "://";
+		$pageURL .= '://';
 		
-		if( $_SERVER["SERVER_PORT"] != "80" )
-			$pageURL .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"] . $_SERVER["REQUEST_URI"];
+		if( '80' != $_SERVER['SERVER_PORT'] )
+			$pageURL .= $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'];
 		else
-			$pageURL .= $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
+			$pageURL .= $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
 
 		return $pageURL;
 }

@@ -21,8 +21,6 @@ add_filter( 'the_posts', 'jobman_display_jobs', 10 ) ;
 add_action( 'init', 'jobman_display_init' );
 // Set the template we want to use
 add_action( 'template_redirect', 'jobman_display_template' );
-// Set the <title> value
-add_filter( 'wp_title', 'jobman_display_title', 10, 3 );
 // Add our own <head> information
 add_action( 'wp_head', 'jobman_display_head' );
 
@@ -43,10 +41,10 @@ add_action( 'do_feed_jobman', 'jobman_rss_feed', 1, 1 );
 // 
 // Widgets
 //
-add_action('widgets_init', create_function('', 'return register_widget("JobmanLatestJobsWidget");'));
-add_action('widgets_init', create_function('', 'return register_widget("JobmanCategoriesWidget");'));
-add_action('widgets_init', create_function('', 'return register_widget("JobmanHighlightedJobsWidget");'));
-add_action('widgets_init', create_function('', 'return register_widget("JobmanJobsWidget");'));
+add_action( 'widgets_init', create_function( '', 'return register_widget("JobmanLatestJobsWidget");' ) );
+add_action( 'widgets_init', create_function( '', 'return register_widget("JobmanCategoriesWidget");' ) );
+add_action( 'widgets_init', create_function( '', 'return register_widget("JobmanHighlightedJobsWidget");' ) );
+add_action( 'widgets_init', create_function( '', 'return register_widget("JobmanJobsWidget");' ) );
 
 //
 // Admin Hooks
