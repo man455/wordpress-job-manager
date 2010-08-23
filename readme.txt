@@ -85,10 +85,6 @@ Apache's `mod_mime_magic` doesn't recognise docx file type properly, and older v
 
 In your WordPress MultiSite admin, go to Site Admin->Options. Update the "Upload File Types" option to include the various extensions (doc, docx, pdf, odt) that people are likely to upload their resume with.
 
-= When I create a new site in WordPress MultiSite, Job Manager doesn't work on the new site =
-
-This is a known problem with WordPress not activating plugins correctly when a new site is created. Please install the [Proper Network Activation plugin](http://wordpress.org/extend/plugins/proper-network-activation/) as a workaround.
-
 == Other Plugin Support ==
 
 Job Manager supports added functionality when other plugins are installed. If you think your plugin could add some functionality to Job Manager, please [submit a feature request](http://code.google.com/p/wordpress-job-manager/issues/list).
@@ -109,8 +105,10 @@ Notice the version number in brackets. This is the version series that the trans
 
 * Danish Translation (0.7.x), provided by [Christian Olesen](http://www.lithin.com/) and [Caspar Lange](http://www.lithin.com/)
 * Dutch Translation (0.7.x, 95% complete), provided by [Patrick Tessels](http://www.centrologic.nl/) and [Henk van den Bor](http://webtaurus.nl/)
+* Estonian Translation (0.7.x), provided by Robert Jakobson
 * French Translation (0.7.x), provided by [Fabrice Fotso](http://www.procure-smart.com/) and Vincent Clady
 * German Translation (0.6.x), provided by [tolingo translations](http://www.tolingo.com/)
+* Portuguese (Brazil) Translation (0.7.x), provided by [Alex Ferreira](http://www.alexfj.com.br/)
 * Spanish Translation (0.7.x), provided by [TradiArt](http://www.tradiart.com)
 
 = Special Thanks =
@@ -122,6 +120,17 @@ Notice the version number in brackets. This is the version series that the trans
 Print Icon courtesy of [VisualPharm](http://www.visualpharm.com/), under a [CC BY-ND](http://creativecommons.org/licenses/by-nd/3.0/) license.
 
 == Changelog ==
+
+= 0.7.13 =
+* ADDED: Estonian Translation, provided by Robert Jakobson
+* ADDED: Portuguese (Brazil) translation, provided by [Alex Ferreira](http://www.alexfj.com.br/)
+* FIXED: User registration page not working under some circumstances
+* FIXED: Job fields not being sorted correctly
+* FIXED: Play nicely with MultiSite
+* FIXED: Applications incorrectly failing mandatory field checks
+* FIXED: A few PHP warnings
+* FIXED: Some settings not being initialised
+* FIXED: Incorrect SI Captcha detection message
 
 = 0.7.12 =
 * FIXED: Category list on application form could fail with fatal error
