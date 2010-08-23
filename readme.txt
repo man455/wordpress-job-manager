@@ -123,15 +123,6 @@ Print Icon courtesy of [VisualPharm](http://www.visualpharm.com/), under a [CC B
 
 == Changelog ==
 
-= 0.7.12 =
-* FIXED: Category list on application form could fail with fatal error
-* FIXED: Some PHP warnings
-* FIXED: Some undefined default settings
-* FIXED: Icon list is ugly when there are many icons
-
-= 0.7.11 =
-* FIXED: New rewrite rules caused category lists to fail
-
 = 0.7.10 =
 * FIXED: Silly bug in activation
 
