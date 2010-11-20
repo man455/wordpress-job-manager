@@ -1,5 +1,6 @@
 <?php
 function jobman_display_apply( $jobid, $cat = NULL ) {
+	global $si_image_captcha;
 	get_currentuserinfo();
 
 	$options = get_option( 'jobman_options' );
@@ -105,12 +106,12 @@ function jobman_display_apply( $jobid, $cat = NULL ) {
 	}
 	
 	$content .= '<form action="" enctype="multipart/form-data" onsubmit="return jobman_apply_filter()" method="post">';
-	$content .= '<input type="hidden" name="jobman-apply" value="1">';
-	$content .= '<input type="hidden" name="jobman-jobid" value="' . $jobid . '">';
-	$content .= '<input type="hidden" name="jobman-categoryid" value="' . implode( ',', $cat_arr ) . '">';
+	$content .= '<input type="hidden" name="jobman-apply" value="1" />';
+	$content .= '<input type="hidden" name="jobman-jobid" value="' . $jobid . '" />';
+	$content .= '<input type="hidden" name="jobman-categoryid" value="' . implode( ',', $cat_arr ) . '" />';
 	
 	if( array_key_exists( 'jobman-joblist', $_REQUEST ) )
-		$content .= '<input type="hidden" name="jobman-joblist" value="' . implode( ',', $_REQUEST['jobman-joblist'] ) . '">';
+		$content .= '<input type="hidden" name="jobman-joblist" value="' . implode( ',', $_REQUEST['jobman-joblist'] ) . '" />';
 	
 	if( empty( $options['templates']['application_form'] ) ) {
 		$gencat = NULL;
@@ -142,7 +143,7 @@ function jobman_display_apply( $jobid, $cat = NULL ) {
 }
 
 function jobman_display_apply_generated( $foundjob = false, $job = NULL, $cat = NULL ) {
-	global $current_user, $si_image_captcha;
+	global $current_user, $si_image_captcha, $wp_version;
 	$options = get_option( 'jobman_options' );
 	
 	$content = '';
@@ -215,7 +216,7 @@ function jobman_display_apply_generated( $foundjob = false, $job = NULL, $cat = 
 					else
 						$content .= '<td class="th"></td>';
 
-					$content .= '<td>' . jobman_app_field_input_html( $id, $field, $data ) . '</td></tr>';
+					$content .= '<td>' . jobman_app_field_input_html( $id, $field, $data, $mandatory ) . '</td></tr>';
 					break;
 				case 'heading':
 					if( ! $start )
@@ -244,7 +245,10 @@ function jobman_display_apply_generated( $foundjob = false, $job = NULL, $cat = 
 	if( isset( $si_image_captcha ) && $options['plugins']['sicaptcha'] ) {
 		// SI CAPTCHA echos directly to screen. We need to redirect that to our $content buffer.
 		ob_start();
-		$si_image_captcha->si_captcha_comment_form();
+		if( $wp_version[0] > 2 )
+			$si_image_captcha->si_captcha_comment_form_wp3();
+		else
+			$si_image_captcha->si_captcha_comment_form();
 		$content .= '<tr><td colspan="2">' . ob_get_contents() . '</td></tr>';
 		ob_end_clean();
 	}
@@ -412,11 +416,14 @@ function jobman_generate_cat_select( $cat, $type ) {
 	return $content;
 }
 
-function jobman_app_field_input_html( $id, $field, $data ) {
+function jobman_app_field_input_html( $id, $field, $data, $mandatory = '' ) {
 	global $jobman_geoloc;
 	$content = '';
 	
 	$data = esc_attr( $data );
+	
+	if( ! empty( $field['label'] ) )
+		$mandatory = '';
 
 	switch( $field['type'] ) {
 		case 'text':
@@ -426,7 +433,7 @@ function jobman_app_field_input_html( $id, $field, $data ) {
 			$display_values = split( "\n", $field['data'] );
 			
 			foreach( $values as $key => $value ) {
-				$content .= "<input type='radio' name='jobman-field-$id' value='" . trim( $value ) . "' /> {$display_values[$key]}";
+				$content .= "$mandatory <input type='radio' name='jobman-field-$id' value='" . trim( $value ) . "' /> {$display_values[$key]}";
 				if( count( $values ) > 1 )
 					$content .= '<br/>';
 			}
@@ -436,7 +443,7 @@ function jobman_app_field_input_html( $id, $field, $data ) {
 			$display_values = split( "\n", $field['data'] );
 			
 			foreach( $values as $key => $value ) {
-				$content .= "<input type='checkbox' name='jobman-field-{$id}[]' value='" . trim( $value ) . "' /> {$display_values[$key]}";
+				$content .= "$mandatory <input type='checkbox' name='jobman-field-{$id}[]' value='" . trim( $value ) . "' /> {$display_values[$key]}";
 				if( count( $values ) > 1 )
 					$content .= '<br/>';
 			}
@@ -445,23 +452,23 @@ function jobman_app_field_input_html( $id, $field, $data ) {
 			$values = split( "\n", $data );
 			$display_values = split( "\n", $field['data'] );
 			
-			$content .= "<select name='jobman-field-{$id}[]'>";
+			$content .= "$mandatory <select name='jobman-field-{$id}[]'>";
 			foreach( $values as $key => $value ) {
 				$content .= "<option value='" . trim( $value ) . "' /> {$display_values[$key]}</option>";
 			}
 			$content .= "</select>";
 			return $content;
 		case 'textarea':
-			return "<textarea name='jobman-field-$id'>{$field['data']}</textarea>";
+			return "$mandatory <textarea name='jobman-field-$id'>{$field['data']}</textarea>";
 		case 'date':
-			return "<input type='text' class='datepicker' name='jobman-field-$id' value='$data' />";
+			return "$mandatory <input type='text' class='datepicker' name='jobman-field-$id' value='$data' />";
 		case 'file':
-			return "<input type='file' name='jobman-field-$id' />";
+			return "$mandatory <input type='file' name='jobman-field-$id' />";
 		case 'geoloc':
 			$jobman_geoloc = true;
 			$content .= "<input type='hidden' class='jobman-geoloc-data' name='jobman-field-$id' />";
 			$content .= "<input type='hidden' class='jobman-geoloc-original-display' name='jobman-field-original-display-$id' />";
-			$content .= "<input type='text' class='jobman-geoloc-display' name='jobman-field-display-$id' />";
+			$content .= "$mandatory <input type='text' class='jobman-geoloc-display' name='jobman-field-display-$id' />";
 			return $content;
 		case 'html':
 			return $field['data'];
@@ -475,6 +482,8 @@ function jobman_app_field_input_html( $id, $field, $data ) {
 function jobman_store_application( $jobid, $cat ) {
 	global $current_user;
 	get_currentuserinfo();
+
+	$cat = get_term_by( 'slug', $cat, 'jobman_category' );
 
 	$filter_err = jobman_check_filters( $jobid, $cat );
 	if($filter_err != -1) {
@@ -503,7 +512,7 @@ function jobman_store_application( $jobid, $cat ) {
 	$_POST['jd_tweet_this'] = 'no';
 	
 	// Check for recent applications for the same job by the same user
-	if( ! empty( $current_user ) && -1 != $jobid ) {
+	if( ! empty( $current_user ) && $current_user->ID > 0 && -1 != $jobid ) {
 		$args = array(
 					'post_status' => 'private',
 					'post_type' => 'jobman_app',
@@ -647,14 +656,24 @@ function jobman_check_filters( $jobid, $cat ) {
 	$options = get_option( 'jobman_options' );
 	
 	$fields = $options['fields'];
-	
+
 	$matches = array();
 	if( count( $fields ) > 0 ) {
 		foreach( $fields as $id => $field ) {
 			if( '' == $field['filter'] && ! $field['mandatory'] )
 				// No filter for this field, not mandatory
 				continue;
+				
+			if( in_array( $field['type'], array( 'html', 'heading', 'blank' ) ) )
+				// Not a field that we should be checking
+				continue;
 			
+			if( array_key_exists( 'categories', $field ) && count( $field['categories'] ) > 0 ) {
+				// If there are cats defined for this field, check that either the job has one of those categories, or we're submitting to that category
+				if( empty( $cat ) || ! in_array( $cat->term_id, $field['categories'] ) )
+					continue;
+			}
+
 			$used_eq = false;
 			$eqflag = false;
 			
