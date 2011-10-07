@@ -3,7 +3,7 @@ Contributors: pento
 Donate link: http://pento.net/donate/
 Tags: jobs, job, manager, list, listing, employer, application, board
 Requires at least: 2.9
-Tested up to: 3.0
+Tested up to: 3.3
 Stable tag: trunk
 
 A job listing and job application management plugin for WordPress.
@@ -85,10 +85,6 @@ Apache's `mod_mime_magic` doesn't recognise docx file type properly, and older v
 
 In your WordPress MultiSite admin, go to Site Admin->Options. Update the "Upload File Types" option to include the various extensions (doc, docx, pdf, odt) that people are likely to upload their resume with.
 
-= When I create a new site in WordPress MultiSite, Job Manager doesn't work on the new site =
-
-This is a known problem with WordPress not activating plugins correctly when a new site is created. Please install the [Proper Network Activation plugin](http://wordpress.org/extend/plugins/proper-network-activation/) as a workaround.
-
 == Other Plugin Support ==
 
 Job Manager supports added functionality when other plugins are installed. If you think your plugin could add some functionality to Job Manager, please [submit a feature request](http://code.google.com/p/wordpress-job-manager/issues/list).
@@ -107,11 +103,16 @@ If you want a [CAPTCHA](http://en.wikipedia.org/wiki/CAPTCHA) on your Applicatio
 
 Notice the version number in brackets. This is the version series that the translation is up-to-date with. If that version series is lower than the current release, you can still use the translation, there just may be some strings that still show in English. If you'd like to add your own language, or help keep an existing language up-to-date, please [contact me](http://pento.net/contact/)!
 
+* Arabic Translation (0.7.x), provided by [Ali Al-Ghalebi](http://www.ghalebi.info/)
+* Czech Translation (0.7.x), provided by [Lukas](mailto:prdlik@centrum.cz)
 * Danish Translation (0.7.x), provided by [Christian Olesen](http://www.lithin.com/) and [Caspar Lange](http://www.lithin.com/)
-* Dutch Translation (0.7.x, 95% complete), provided by [Patrick Tessels](http://www.centrologic.nl/) and [Henk van den Bor](http://webtaurus.nl/)
+* Dutch Translation (0.7.x, 93% complete), provided by [Patrick Tessels](http://www.centrologic.nl/) and [Henk van den Bor](http://webtaurus.nl/)
+* Estonian Translation (0.7.x), provided by Robert Jakobson
 * French Translation (0.7.x), provided by [Fabrice Fotso](http://www.procure-smart.com/) and Vincent Clady
-* German Translation (0.6.x), provided by [tolingo translations](http://www.tolingo.com/)
+* German Translation (0.7.x, 95% complete), provided by [tolingo translations](http://www.tolingo.com/) and [Joachim Richter](http://www.la-palma-diving.com/)
+* Portuguese (Brazil) Translation (0.7.x), provided by [Alex Ferreira](http://www.alexfj.com.br/)
 * Spanish Translation (0.7.x), provided by [TradiArt](http://www.tradiart.com)
+* Swedish Translation (0.7.x), provided by [Berndt Axelsson](http://www.saxekon.se/)
 
 = Special Thanks =
 
@@ -122,6 +123,77 @@ Notice the version number in brackets. This is the version series that the trans
 Print Icon courtesy of [VisualPharm](http://www.visualpharm.com/), under a [CC BY-ND](http://creativecommons.org/licenses/by-nd/3.0/) license.
 
 == Changelog ==
+
+= 0.7.18 =
+* FIXED: Now compatible with WordPress 3.3!
+* FIXED: HTML entities not being encoded properly in job titles
+* FIXED: Could get a warning when submitting applications
+* FIXED: Unable to download the CSV of Applications when MultiSite is enabled
+* FIXED: Incorrect page numbers could show when dividing the jobs list into pages
+* FIXED: Frontend job dates weren't being translated
+* FIXED: A PHP warning in the settings
+* FIXED: Possible JS error with jQuery 1.5
+* FIXED: Incompatibility with jQuery 1.6
+* FIXED: Files attached to jobs are now deleted when the job is deleted
+* FIXED: Incorrectly placed text in the category dropdown on the application form
+* FIXED: Select boxes not displaying properly in IE7
+* FIXED: RSS feed not loading correctly
+
+= 0.7.17 =
+* FIXED: Job Title not displaying on application page
+
+= 0.7.16 =
+* ADDED: Arabic Translation, provided by [Ali Al-Ghalebi](http://www.ghalebi.info/)
+* ADDED: Czech Translation, provided by [Lukas](mailto:prdlik@centrum.cz)
+* FIXED: Jobs names starting with "register" weren't displaying
+* FIXED: WordPress Import could cause duplicate entries in the job list and widgets
+* FIXED: Category lists weren't displaying properly for some users
+* FIXED: HTML Calendar in the frontend job select
+* FIXED: (Hopefully) Activation error in WordPress Multi Site
+* FIXED: Some PHP warnings on the Admin Jobs List page
+* FIXED: File fields being filter on application submit
+
+= 0.7.15 =
+* CHANGED: "Powered By" line now defaults to off
+* CHANGED: Geoloc JS only loads if it might be needed
+* FIXED: Wrong date being set on Jobs when no date is entered
+* FIXED: `<title>` text not displaying in Hybrid theme
+* FIXED: Some HTML errors on the frontend
+* FIXED: Page could error out with MultiSite and no fancy URLS
+* FIXED: Compatibility with SI CAPTCHA plugin
+* FIXED: Compatibility with FeedWordPress plugin
+* FIXED: Sanity checking on some shortcodes
+* FIXED: Checking for sane values when deleting applications
+* FIXED: Radio buttons not being checked for the mandatory field popup
+* FIXED: Checkboxes not being checked properly for the mandatory field popup
+* FIXED: Duplicate application check could be triggered by anonymous users
+* FIXED: Category pages not showing if main job page was set to front page
+
+= 0.7.14 =
+* ADDED: Swedish Translation, provided by [Berndt Axelsson](http://www.saxekon.se/)
+* CHANGED: If no Sort Order is selected in Job List Sorting, it will default to ASC, rather than random
+* UPDATED: German Translation, provided by [Joachim Richter](http://www.la-palma-diving.com/)
+* UPDATED: Portuguese (Brazil) Translation, provided by [Alex Ferreira](http://www.alexfj.com.br/)
+* UPDATED: Spanish Translation, provided by [TradiArt](http://www.tradiart.com)
+* FIXED: Fields with no label not showing mandatory asterisk
+* FIXED: Checkboxes being skipped in mandatory field check
+* FIXED: Fields with no label not showing nicely in mandatory field check
+* FIXED: Stop overriding Mystique theme CSS
+* FIXED: Don't check Heading, HTML or Blank fields for Mandatory or Filter rules
+* FIXED: Admin JS error in IE7
+* FIXED: Jobs not displaying if WPML is enabled
+* FIXED: Applications not printing properly in IE7
+
+= 0.7.13 =
+* ADDED: Estonian Translation, provided by Robert Jakobson
+* ADDED: Portuguese (Brazil) translation, provided by [Alex Ferreira](http://www.alexfj.com.br/)
+* FIXED: User registration page not working under some circumstances
+* FIXED: Job fields not being sorted correctly
+* FIXED: Play nicely with MultiSite
+* FIXED: Applications incorrectly failing mandatory field checks
+* FIXED: A few PHP warnings
+* FIXED: Some settings not being initialised
+* FIXED: Incorrect SI Captcha detection message
 
 = 0.7.12 =
 * FIXED: Category list on application form could fail with fatal error

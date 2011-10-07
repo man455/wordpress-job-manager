@@ -60,11 +60,11 @@ function jobman_conf() {
 		$widths = array( '78%', '20%' );
 		$functions = array(
 						array( 'jobman_print_settings_box', 'jobman_print_categories_box', 'jobman_print_icons_box', 'jobman_print_user_box', 'jobman_print_application_email_box', 'jobman_print_other_plugins_box', 'jobman_print_uninstall_box' ),
-						array( 'jobman_print_donate_box', 'jobman_print_about_box', 'jobman_print_translators_box' )
+						array( /*'jobman_print_other_projects_box',*/ 'jobman_print_donate_box', 'jobman_print_about_box', 'jobman_print_translators_box' )
 					);
 		$titles = array(
 					array( __( 'Settings', 'jobman' ), __( 'Categories', 'jobman' ), __( 'Icons', 'jobman' ), __( 'User Settings', 'jobman' ), __( 'Application Email Settings', 'jobman' ), __( 'Other Plugins', 'jobman' ), __( 'Uninstall Settings', 'jobman' ) ),
-					array( __( 'Donate', 'jobman' ), __( 'About This Plugin', 'jobman' ), __( 'Translators', 'jobman' ) )
+					array( /*__( 'My Other Projects', 'jobman' ),*/ __( 'Donate', 'jobman' ), __( 'About This Plugin', 'jobman' ), __( 'Translators', 'jobman' ) )
 				);
 				
 		if( $options['interviews'] ) {
@@ -260,7 +260,8 @@ function jobman_print_icons_box() {
 	$template .= '<td><input class="regular-text code" type="file" name="icon[]" /></td>';
 	$template .= '<td><a href="#" onclick="jobman_delete( this, \\\'id\\\', \\\'jobman-delete-icon-list\\\' ); return false;">' . __( 'Delete', 'jobman' ) . '</a></td></tr>';
 	
-	echo $template;
+	$print_template = str_replace( "\\'", "'", $template );
+	echo $print_template;
 ?>
 		<tr id="jobman-iconnew">
 				<td colspan="4" style="text-align: right;">
@@ -515,7 +516,7 @@ function jobman_print_other_plugins_box() {
 	
 	$sicaptcha = false;
 	$class = 'pluginwarning';
-	$sistatus = __( 'Installed', 'jobman' );
+	$sistatus = __( 'Not Installed', 'jobman' );
 
 	if( class_exists( 'siCaptcha' ) ) {
 		$sicaptcha = true;

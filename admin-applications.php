@@ -747,11 +747,13 @@ function jobman_application_delete() {
 	foreach( $apps as $app ) {
 		$appmeta = get_post_custom( $app );
 		$appdata = array();
-		foreach( $appmeta as $key => $value ) {
-			if( is_array( $value ) )
-				$appdata[$key] = $value[0];
-			else
-				$appdata[$key] = $value;
+		if( is_array( $appmeta ) ) {
+			foreach( $appmeta as $key => $value ) {
+				if( is_array( $value ) )
+					$appdata[$key] = $value[0];
+				else
+					$appdata[$key] = $value;
+			}
 		}
 
 		// Delete any files uploaded
@@ -765,6 +767,11 @@ function jobman_application_delete() {
 }
 
 function jobman_get_application_csv() {
+	if( is_multisite() ) {
+		// Multisite seems to do some late loading. We need the cookie info now, so we can validate the user.
+		require_once( ABSPATH . WPINC . '/default-constants.php' );
+		wp_cookie_constants();
+	}
 	require_once( ABSPATH . WPINC . '/pluggable.php' );
 	
 	$options = get_option( 'jobman_options' );

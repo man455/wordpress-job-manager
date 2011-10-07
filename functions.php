@@ -1,13 +1,14 @@
 <?php
 function jobman_create_dashboard( $widths, $functions, $titles, $params = array() ) {
 ?>
+<input type="hidden" id="wp_auto_columns" />
 <div id="dashboard-widgets-wrap">
 	<div id='dashboard-widgets' class='metabox-holder'>
 <?php
 	$ii = 0;
 	foreach( $widths as $width ) {
 ?>
-		<div class='postbox-container' style='width:<?php echo $width ?>'>
+		<div id='postbox-container-<?php echo $ii + 1; ?>' class='postbox-container' style='width:<?php echo $width ?>'>
 			<div id='normal-sortables' class='meta-box-sortables'>
 <?php
 		$jj = 0;
@@ -135,7 +136,7 @@ function jobman_current_url() {
 
 function jobman_job_live_where( $where = '' ) {
 	global $wpdb;
-	$where .= " AND $wpdb->posts.post_date <= NOW() AND jobman_postmeta.meta_key='displayenddate' AND ( jobman_postmeta.meta_value='' OR jobman_postmeta.meta_value >= NOW() ) ";
+	$where .= " AND $wpdb->posts.post_date_gmt <= UTC_TIMESTAMP() AND jobman_postmeta.meta_key='displayenddate' AND ( jobman_postmeta.meta_value='' OR jobman_postmeta.meta_value >= UTC_TIMESTAMP() ) ";
 	return $where;
 }
 
@@ -143,6 +144,10 @@ function jobman_job_live_join( $join = '' ) {
 	global $wpdb;
 	$join .= " LEFT JOIN $wpdb->postmeta AS jobman_postmeta ON $wpdb->posts.ID = jobman_postmeta.post_id ";
 	return $join;
+}
+
+function jobman_job_live_distinct( $distinct = '' ) {
+	return 'distinct';
 }
 
 if( ! function_exists( 'array_insert' ) ) {

@@ -71,7 +71,7 @@ function jobman_list_jobs() {
 	$fieldcount = 0;
 	if( count( $fields ) > 0 ) {
 		foreach( $fields as $field ) {
-			if( $field['listdisplay'] ) {
+			if( array_key_exists( 'listdisplay', $field ) && $field['listdisplay'] ) {
 			$fieldcount++;
 ?>
 				<th scope="col"><?php echo $field['label'] ?></th>
@@ -208,7 +208,7 @@ function jobman_list_jobs_data( $jobs, $showexpired = false ) {
 <?php
 			if( count( $fields ) ) {
 				foreach( $fields as $id => $field ) {
-					if( $field['listdisplay'] ) {
+					if( array_key_exists( 'listdisplay', $field ) && $field['listdisplay'] ) {
 						$data = get_post_meta( $job->ID, "data$id", true );
 						if( ! empty( $data ) ) {
 							if( 'file' == $field['type'] )
@@ -242,6 +242,7 @@ function jobman_add_job() {
 }
 
 function jobman_edit_job( $jobid ) {
+	global $wp_version;
 	$options = get_option( 'jobman_options' );
 	
 	if( array_key_exists( 'jobmansubmit', $_REQUEST ) ) {
@@ -295,8 +296,9 @@ function jobman_edit_job( $jobid ) {
 			$jobdata[$key] = $value;
 	}
 	
-	if( user_can_richedit() )
-		wp_tiny_mce( false, array( 'editor_selector' => 'jobman-editor' ) );
+	if( user_can_richedit() && version_compare( $wp_version, '3.3-aortic-dissection', '<' ) ) {
+			wp_tiny_mce( false, array( 'editor_selector' => 'jobman-editor' ) );
+	}
 ?>
 	<form action="<?php echo admin_url('admin.php?page=jobman-list-jobs') ?>" enctype="multipart/form-data" method="post">
 	<input type="hidden" name="jobmansubmit" value="1" />
@@ -383,7 +385,7 @@ function jobman_edit_job( $jobid ) {
 				$data = '';
 
 			if( 'heading' != $field['type'] )
-				$content .= '<tr>';
+				echo '<tr>';
 				
 			if( ! array_key_exists( 'description', $field ) )
 				$field['description'] = '';
@@ -391,18 +393,18 @@ function jobman_edit_job( $jobid ) {
 			switch( $field['type'] ) {
 				case 'text':
 					if( '' != $field['label'] )
-						$content .= "<th scope='row'>{$field['label']}</th>";
+						echo "<th scope='row'>{$field['label']}</th>";
 					else
-						$content .= '<td class="th"></td>';
+						echo '<td class="th"></td>';
 					
-					$content .= "<td><input type='text' name='jobman-field-$id' value='$data' /></td>";
-					$content .= "<td><span class='description'>{$field['description']}</span></td></tr>";
+					echo "<td><input type='text' name='jobman-field-$id' value='$data' /></td>";
+					echo "<td><span class='description'>{$field['description']}</span></td></tr>";
 					break;
 				case 'radio':
 					if( '' != $field['label'] )
-						$content .= "<th scope='row'>{$field['label']}</th><td>";
+						echo "<th scope='row'>{$field['label']}</th><td>";
 					else
-						$content .= '<td class="th"></td><td>';
+						echo '<td class="th"></td><td>';
 					
 					$values = split( "\n", strip_tags( $field['data'] ) );
 					$display_values = split( "\n", $field['data'] );
@@ -411,16 +413,16 @@ function jobman_edit_job( $jobid ) {
 						$checked = '';
 						if( $value == $data )
 							$checked = ' checked="checked"';
-						$content .= "<input type='radio' name='jobman-field-$id' value='" . trim( $value ) . "'$checked /> {$display_values[$key]}<br/>";
+						echo "<input type='radio' name='jobman-field-$id' value='" . trim( $value ) . "'$checked /> {$display_values[$key]}<br/>";
 					}
-					$content .= '</td>';
-					$content .= "<td><span class='description'>{$field['description']}</span></td></tr>";
+					echo '</td>';
+					echo "<td><span class='description'>{$field['description']}</span></td></tr>";
 					break;
 				case 'checkbox':
 					if( '' != $field['label'] )
-						$content .= "<th scope='row'>{$field['label']}</th><td>";
+						echo "<th scope='row'>{$field['label']}</th><td>";
 					else
-						$content .= '<td class="th"></td><td>';
+						echo '<td class="th"></td><td>';
 
 					$values = split( "\n", strip_tags( $field['data'] ) );
 					$display_values = split( "\n", $field['data'] );
@@ -435,78 +437,85 @@ function jobman_edit_job( $jobid ) {
 						$checked = '';
 						if( in_array( $value, $data ) )
 							$checked = ' checked="checked"';
-						$content .= "<input type='checkbox' name='jobman-field-{$id}[]' value='$value'$checked /> {$display_values[$key]}<br/>";
+						echo "<input type='checkbox' name='jobman-field-{$id}[]' value='$value'$checked /> {$display_values[$key]}<br/>";
 					}
-					$content .= '</td>';
-					$content .= "<td><span class='description'>{$field['description']}</span></td></tr>";
+					echo '</td>';
+					echo "<td><span class='description'>{$field['description']}</span></td></tr>";
 					break;
 				case 'textarea':
 					if( '' != $field['label'] )
-						$content .= "<th scope='row'>{$field['label']}</th>";
+						echo "<th scope='row'>{$field['label']}</th>";
 					else
-						$content .= '<td class="th"></td>';
+						echo '<td class="th"></td>';
 
-					if( '' == $field['description'] ) {
-						$content .= "<td colspan='2'>";
-						if( user_can_richedit() )
-							$content .= "<p id='field-toolbar-$id' class='jobman-editor-toolbar'><a class='toggleHTML'>" . __( 'HTML', 'jobman' ) . '</a><a class="active toggleVisual">' . __( 'Visual', 'jobman' ) . '</a></p>';
-						$content .= "<textarea class='large-text code jobman-editor jobman-field-$id' name='jobman-field-$id' id='jobman-field-$id' rows='7'>$data</textarea></td></tr>";
+					if( '' == $field['description'] )
+						echo "<td colspan='2'>";
+					else
+						echo '<td>';
+
+					if( user_can_richedit() && version_compare( $wp_version, '3.3-aortic-dissection', '<' )) {
+						echo "<p id='field-toolbar-$id' class='jobman-editor-toolbar'><a class='toggleHTML'>" . __( 'HTML', 'jobman' ) . '</a><a class="active toggleVisual">' . __( 'Visual', 'jobman' ) . '</a></p>';
+						echo "<textarea class='large-text code jobman-editor jobman-field-$id' name='jobman-field-$id' id='jobman-field-$id' rows='7'>$data</textarea></td>";
 					}
 					else {
-						$content .= '<td>';
-						if( user_can_richedit() )
-							$content .= "<p id='field-toolbar-$id' class='jobman-editor-toolbar'><a class='toggleHTML'>" . __( 'HTML', 'jobman' ) . '</a><a class="active toggleVisual">' . __( 'Visual', 'jobman' ) . '</a></p>';
-						$content .= "<textarea class='large-text code jobman-editor jobman-field-$id' name='jobman-field-$id' id='jobman-field-$id' rows='7'>$data</textarea></td>";
+						$settings = array(
+							'editor_class' => "large-text code jobman-editor jobman-field-$id"
+						);
+						wp_editor( $data, "jobman-field-$id", $settings );
 					}
+
+					if( '' == $field['description'] )
+						echo '</tr>';
+					else
+						echo "<td><span class='description'>{$field['description']}</span></td></tr>";
+
 					break;
 				case 'date':
 					if( '' != $field['label'] )
-						$content .= "<th scope='row'>{$field['label']}</th>";
+						echo "<th scope='row'>{$field['label']}</th>";
 					else
-						$content .= '<td class="th"></td>';
+						echo '<td class="th"></td>';
 
-					$content .= "<td><input type='text' class='datepicker' name='jobman-field-$id' value='$data' /></td>";
-					$content .= "<td><span class='description'>{$field['description']}</span></td></tr>";
+					echo "<td><input type='text' class='datepicker' name='jobman-field-$id' value='$data' /></td>";
+					echo "<td><span class='description'>{$field['description']}</span></td></tr>";
 					break;
 				case 'file':
 					if( '' != $field['label'] )
-						$content .= "<th scope='row'>{$field['label']}</th>";
+						echo "<th scope='row'>{$field['label']}</th>";
 					else
-						$content .= '<td class="th"></td>';
+						echo '<td class="th"></td>';
 
-					$content .= '<td>';
-					$content .= "<input type='file' name='jobman-field-$id' />";
+					echo '<td>';
+					echo "<input type='file' name='jobman-field-$id' />";
 
 					if( ! empty( $data ) ) {
-						$content .= '<br/><a href="' . wp_get_attachment_url( $data ) . '">' . wp_get_attachment_url( $data ) . '</a>';
-						$content .= "<input type='hidden' name='jobman-field-current-$id' value='$data' />";
-						$content .= "<br/><input type='checkbox' name='jobman-field-delete-$id' value='1' />" . __( 'Delete File?', 'jobman' );
+						echo '<br/><a href="' . wp_get_attachment_url( $data ) . '">' . wp_get_attachment_url( $data ) . '</a>';
+						echo "<input type='hidden' name='jobman-field-current-$id' value='$data' />";
+						echo "<br/><input type='checkbox' name='jobman-field-delete-$id' value='1' />" . __( 'Delete File?', 'jobman' );
 					}
 
-					$content .= "</td>";
-					$content .= "<td><span class='description'>{$field['description']}</span></td></tr>";
+					echo "</td>";
+					echo "<td><span class='description'>{$field['description']}</span></td></tr>";
 					break;
 				case 'heading':
-					$content .= '</table>';
-					$content .= "<h3>{$field['label']}</h3>";
-					$content .= "<table>";
+					echo '</table>';
+					echo "<h3>{$field['label']}</h3>";
+					echo "<table>";
 					$tablecount++;
 					$totalrowcount--;
 					$rowcount = 0;
 					break;
 				case 'html':
-					$content .= "<td colspan='3'>$data</td></tr>";
+					echo "<td colspan='3'>$data</td></tr>";
 					break;
 				case 'blank':
-					$content .= '<td colspan="3">&nbsp;</td></tr>';
+					echo '<td colspan="3">&nbsp;</td></tr>';
 					break;
 			}
 			
 			$previd = "jobman-field-$id";
 		}
 	}
-	
-	echo $content;
 ?>
 			<tr>
 				<th scope="row"><?php _e( 'Display Start Date', 'jobman' ) ?></th>
@@ -547,9 +556,10 @@ function jobman_updatedb() {
 	
 	wp_get_current_user();
 	
-	$displaystartdate = date( 'Y-m-d H:i:s', strtotime( stripslashes( $_REQUEST['jobman-displaystartdate'] ) ) );
-	if( empty( $displaystartdate ) )
-		$displaystartdate = date( 'Y-m-d H:i:s', strtotime( '-1 day' ) );
+	if( array_key_exists( 'jobman-displaystartdate', $_REQUEST ) && ! empty( $_REQUEST['jobman-displaystartdate'] ) )
+		$displaystartdate = date( 'Y-m-d H:i:s', strtotime( stripslashes( $_REQUEST['jobman-displaystartdate'] ) ) );
+	else
+		$displaystartdate = date( 'Y-m-d H:i:s' );
 
 	$page = array(
 				'comment_status' => 'closed',
@@ -557,7 +567,7 @@ function jobman_updatedb() {
 				'post_status' => 'publish',
 				'post_content' => '',
 				'post_name' => strtolower( str_replace( ' ', '-', $_REQUEST['jobman-title'] ) ),
-				'post_title' => stripslashes( $_REQUEST['jobman-title'] ),
+				'post_title' => stripslashes( html_entity_decode( $_REQUEST['jobman-title'] ) ),
 				'post_type' => 'jobman_job',
 				'post_date' => $displaystartdate,
 				'post_date_gmt' => $displaystartdate,
@@ -712,7 +722,16 @@ function jobman_job_delete_confirm() {
 }
 
 function jobman_job_delete() {
+	$options = get_option( 'jobman_options' );
+	
 	$jobs = explode( ',', $_REQUEST['jobman-job-ids'] );
+	
+	// Get the file fields
+	$file_fields = array();
+	foreach( $options['job_fields'] as $id => $field ) {
+		if( 'file' == $field['type'] )
+			$file_fields[] = $id;
+	}
 	
 	foreach( $jobs as $job ) {
 		// Remove reference from applications
@@ -721,6 +740,23 @@ function jobman_job_delete() {
 			foreach( $apps as $app ) {
 				delete_post_meta( $app->ID, 'job', $job );
 			}
+		}
+
+		$jobmeta = get_post_custom( $job );
+		$jobdata = array();
+		if( is_array( $jobmeta ) ) {
+			foreach( $jobmeta as $key => $value ) {
+				if( is_array( $value ) )
+					$jobdata[$key] = $value[0];
+				else
+					$jobdata[$key] = $value;
+			}
+		}
+
+		// Delete any files uploaded
+		foreach( $file_fields as $fid ) {
+			if( array_key_exists( "data$fid", $jobdata )  && '' != $jobdata["data$fid"] )
+				wp_delete_post( $jobdata["data$fid"] );
 		}
 		// Delete the job
 		wp_delete_post( $job );
